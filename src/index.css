@@ -1,0 +1,42 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html, body { @apply bg-fondo text-texto font-sans antialiased; font-size: 16px; color-scheme: dark; }
+  button, input, select, textarea { font: inherit; color: inherit; }
+  :focus-visible { outline: 2px solid #FAFAFA; outline-offset: 2px; }
+  ::selection { background: #404040; }
+}
+@layer utilities {
+  .cifra { font-variant-numeric: tabular-nums; }
+}
+dialog::backdrop { background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(2px); }
+@keyframes entra { from { opacity: 0; transform: translateY(8px); } }
+.entra { animation: entra .2s ease-out; }
+
+/* Animaciones de diálogos, paneles laterales y menús flotantes */
+dialog.dlg[open] { animation: dlg-entra .2s cubic-bezier(.2,.8,.2,1); }
+dialog.dlg[open]::backdrop { animation: velo-entra .2s ease-out; }
+dialog.dlg[data-cerrando] { animation: dlg-sale .18s ease-in forwards; }
+dialog.dlg[data-cerrando]::backdrop { animation: velo-sale .18s ease-in forwards; }
+dialog.dlg[data-lateral][open] { animation: lat-entra .26s cubic-bezier(.2,.8,.2,1); }
+dialog.dlg[data-lateral][data-cerrando] { animation: lat-sale .18s ease-in forwards; }
+@keyframes dlg-entra { from { opacity: 0; transform: translateY(12px) scale(.96); } }
+@keyframes dlg-sale { to { opacity: 0; transform: translateY(8px) scale(.97); } }
+@keyframes lat-entra { from { opacity: 0; transform: translateX(48px); } }
+@keyframes lat-sale { to { opacity: 0; transform: translateX(48px); } }
+@keyframes velo-entra { from { opacity: 0; } }
+@keyframes velo-sale { to { opacity: 0; } }
+.pop-entra { animation: pop-entra .16s cubic-bezier(.2,.8,.2,1); }
+.pop-sale { animation: pop-sale .15s ease-in forwards; pointer-events: none; }
+@keyframes pop-entra { from { opacity: 0; transform: translateY(-6px) scale(.97); } }
+@keyframes pop-sale { to { opacity: 0; transform: translateY(-4px) scale(.98); } }
+/* Transición suave al cambiar de pantalla */
+.pantalla { animation: pantalla-entra .25s ease-out; }
+@keyframes pantalla-entra { from { opacity: 0; transform: translateY(6px); } }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after, ::backdrop { animation-duration: .01ms !important; transition-duration: .01ms !important; } }
+
+/* Contenedores con desplazamiento horizontal sin barra visible (pestañas) */
+.sin-barra { scrollbar-width: none; -ms-overflow-style: none; }
+.sin-barra::-webkit-scrollbar { display: none; }
