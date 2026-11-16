@@ -39,6 +39,7 @@ export const CATALOGO: Cuenta[] = [
       ]),
       k("2106", "Débito Fiscal IVA", "A", undefined, 2310.6),
       k("2107", "Retenciones por pagar", "A", undefined, 415.3),
+      k("2108", "Impuesto sobre la renta por pagar", "A", undefined, 0),
     ]),
   ]),
   k("3", "Patrimonio", "A", [
@@ -53,6 +54,7 @@ export const CATALOGO: Cuenta[] = [
       k("4104", "Costo de Ventas", "D", undefined, 31240.0),
       k("4105", "Gastos de venta", "D", undefined, 3410.8),
       k("4106", "Gastos de administración", "D", undefined, 5120.0),
+      k("4107", "Gasto por impuesto sobre la renta", "D", undefined, 0),
     ]),
   ]),
   k("5", "Cuentas de resultado acreedoras", "A", [
@@ -74,10 +76,19 @@ export const NIVEL: Record<number, string> = { 1: "Clase", 2: "Rubro", 4: "Cuent
 
 export type EstadoPartida = "Borrador" | "Contabilizada" | "Anulada";
 export type Linea = { c: string; n: string; d: number; h: number };
+/** Una versión guardada de una partida contabilizada (HU-23). La vigente es la última. */
+export type Version = { n: number; fecha: string; autor: string; motivo: string; lineas: Linea[] };
 export type Partida = {
   id: string; num?: number; fecha: string; tipo: string; concepto: string; doc?: string;
   debe: number; haber: number; estado: EstadoPartida; autor: string; suc: string; lineas?: Linea[];
+  versiones?: Version[];
+  /** Partida original que esta revierte (HU-24). */
+  reversaDe?: string;
+  /** Partida de reversión que anuló a esta, con su motivo (HU-24). */
+  anuladaPor?: { id: string; fecha: string; autor: string; motivo: string };
 };
+
+const L = (c: string, n: string, d: number, h: number): Linea => ({ c, n, d, h });
 
 export const PARTIDAS: Partida[] = [
   { id: "b1", fecha: "09/11/2026", tipo: "Operación", concepto: "Compra de mercadería al crédito", doc: "CCF n.º 245", debe: 1130, haber: 1105, estado: "Borrador", autor: "Josué Martínez", suc: "San Miguel Centro",
@@ -86,13 +97,146 @@ export const PARTIDAS: Partida[] = [
     lineas: [{ c: "4106", n: "Gastos de administración", d: 85.4, h: 0 }, { c: "11010301", n: "Banco Agrícola · cuenta corriente", d: 0, h: 85.4 }] },
   { id: "b3", fecha: "10/11/2026", tipo: "Ajuste", concepto: "Depreciación de mobiliario", debe: 120, haber: 120, estado: "Borrador", autor: "María Rivas", suc: "Casa matriz",
     lineas: [{ c: "4106", n: "Gastos de administración", d: 120, h: 0 }, { c: "1202", n: "Depreciación acumulada", d: 0, h: 120 }] },
-  { id: "p7", num: 7, fecha: "08/11/2026", tipo: "Operación", concepto: "Venta al contado según factura 1201", doc: "Factura n.º 1201", debe: 565, haber: 565, estado: "Contabilizada", autor: "Josué Martínez", suc: "San Miguel Centro" },
-  { id: "p6", num: 6, fecha: "06/11/2026", tipo: "Operación", concepto: "Abono de cliente Distribuidora Lemus", doc: "Recibo n.º 330", debe: 1200, haber: 1200, estado: "Contabilizada", autor: "Josué Martínez", suc: "San Miguel Centro" },
-  { id: "p5", num: 5, fecha: "05/11/2026", tipo: "Operación", concepto: "Pago de alquiler del local", doc: "Recibo n.º 41", debe: 650, haber: 650, estado: "Contabilizada", autor: "María Rivas", suc: "Casa matriz" },
-  { id: "p4", num: 4, fecha: "04/11/2026", tipo: "Operación", concepto: "Compra de papelería", doc: "Factura n.º 5512", debe: 42.3, haber: 42.3, estado: "Anulada", autor: "Josué Martínez", suc: "Usulután" },
-  { id: "p3", num: 3, fecha: "03/11/2026", tipo: "Operación", concepto: "Remesa a Banco Agrícola", doc: "Remesa n.º 9921", debe: 3000, haber: 3000, estado: "Contabilizada", autor: "Josué Martínez", suc: "Casa matriz" },
-  { id: "p2", num: 2, fecha: "02/11/2026", tipo: "Operación", concepto: "Venta al crédito a Ferretería Chávez", doc: "CCF n.º 77", debe: 2260, haber: 2260, estado: "Contabilizada", autor: "Josué Martínez", suc: "San Miguel Centro" },
-  { id: "p1", num: 1, fecha: "01/11/2026", tipo: "Apertura", concepto: "Partida de apertura de noviembre", debe: 98450.2, haber: 98450.2, estado: "Contabilizada", autor: "María Rivas", suc: "Casa matriz" },
+  { id: "p8", num: 8, fecha: "11/11/2026", tipo: "Reversión", concepto: "Reversión de la partida n.º 4 · Compra de papelería", doc: "Factura n.º 5512", debe: 42.3, haber: 42.3, estado: "Contabilizada", autor: "María Rivas", suc: "Usulután", reversaDe: "p4",
+    lineas: [L("110102", "Caja chica", 42.3, 0), L("4106", "Gastos de administración", 0, 37.43), L("1112", "Crédito Fiscal IVA", 0, 4.87)] },
+  { id: "p7", num: 7, fecha: "08/11/2026", tipo: "Operación", concepto: "Venta al contado según factura 1201", doc: "Factura n.º 1201", debe: 565, haber: 565, estado: "Contabilizada", autor: "Josué Martínez", suc: "San Miguel Centro",
+    lineas: [L("110101", "Caja general", 565, 0), L("5101", "Ventas", 0, 500), L("2106", "Débito Fiscal IVA", 0, 65)] },
+  { id: "p6", num: 6, fecha: "06/11/2026", tipo: "Operación", concepto: "Abono de cliente Distribuidora Lemus", doc: "Recibo n.º 330", debe: 1200, haber: 1200, estado: "Contabilizada", autor: "Josué Martínez", suc: "San Miguel Centro",
+    lineas: [L("11010301", "Banco Agrícola · cuenta corriente", 1200, 0), L("110301", "Clientes locales", 0, 1200)] },
+  { id: "p5", num: 5, fecha: "05/11/2026", tipo: "Operación", concepto: "Pago de alquiler del local", doc: "Recibo n.º 41", debe: 650, haber: 650, estado: "Contabilizada", autor: "María Rivas", suc: "Casa matriz",
+    lineas: [L("4106", "Gastos de administración", 575.22, 0), L("1112", "Crédito Fiscal IVA", 74.78, 0), L("110101", "Caja general", 0, 650)],
+    versiones: [
+      { n: 1, fecha: "05/11/2026 09:12", autor: "María Rivas", motivo: "Contabilización original",
+        lineas: [L("4105", "Gastos de venta", 575.22, 0), L("1112", "Crédito Fiscal IVA", 74.78, 0), L("110101", "Caja general", 0, 650)] },
+      { n: 2, fecha: "07/11/2026 15:40", autor: "Carlos Hernández", motivo: "El alquiler corresponde a la oficina administrativa, no a ventas.",
+        lineas: [L("4106", "Gastos de administración", 575.22, 0), L("1112", "Crédito Fiscal IVA", 74.78, 0), L("110101", "Caja general", 0, 650)] },
+    ] },
+  { id: "p4", num: 4, fecha: "04/11/2026", tipo: "Operación", concepto: "Compra de papelería", doc: "Factura n.º 5512", debe: 42.3, haber: 42.3, estado: "Anulada", autor: "Josué Martínez", suc: "Usulután",
+    lineas: [L("4106", "Gastos de administración", 37.43, 0), L("1112", "Crédito Fiscal IVA", 4.87, 0), L("110102", "Caja chica", 0, 42.3)],
+    anuladaPor: { id: "p8", fecha: "11/11/2026", autor: "María Rivas", motivo: "La factura era de otra sucursal; se registrará de nuevo en la correcta." } },
+  { id: "p3", num: 3, fecha: "03/11/2026", tipo: "Operación", concepto: "Remesa a Banco Agrícola", doc: "Remesa n.º 9921", debe: 3000, haber: 3000, estado: "Contabilizada", autor: "Josué Martínez", suc: "Casa matriz",
+    lineas: [L("11010301", "Banco Agrícola · cuenta corriente", 3000, 0), L("110101", "Caja general", 0, 3000)] },
+  { id: "p2", num: 2, fecha: "02/11/2026", tipo: "Operación", concepto: "Venta al crédito a Ferretería Chávez", doc: "CCF n.º 77", debe: 2260, haber: 2260, estado: "Contabilizada", autor: "Josué Martínez", suc: "San Miguel Centro",
+    lineas: [L("110301", "Clientes locales", 2260, 0), L("5101", "Ventas", 0, 2000), L("2106", "Débito Fiscal IVA", 0, 260)] },
+  { id: "p1", num: 1, fecha: "01/11/2026", tipo: "Apertura", concepto: "Partida de apertura de noviembre", debe: 98450.2, haber: 98450.2, estado: "Contabilizada", autor: "María Rivas", suc: "Casa matriz",
+    lineas: [L("110101", "Caja general", 2450, 0), L("110102", "Caja chica", 150, 0), L("11010301", "Banco Agrícola · cuenta corriente", 18320.55, 0), L("11010302", "Banco Cuscatlán · cuenta de ahorro", 5210, 0),
+      L("110301", "Clientes locales", 7840.25, 0), L("1109", "Inventarios", 38289, 0), L("1112", "Crédito Fiscal IVA", 1290.4, 0), L("120101", "Mobiliario y equipo de oficina", 6400, 0), L("120102", "Equipo de transporte", 18500, 0),
+      L("1202", "Depreciación acumulada", 0, 4210), L("210201", "Cuentas por Pagar Comerciales · Locales", 0, 9105), L("3101", "Capital social", 0, 50000), L("3105", "Utilidades acumuladas", 0, 35135.2)] },
 ];
 
 export const TIPOS_PARTIDA = ["Apertura", "Operación", "Ajuste", "Cierre", "Reapertura", "Reversión"];
+
+/* =====================================================================================
+ * CheroPhonex · noviembre 2026 (HU-90).
+ * OJO: son cifras ILUSTRATIVAS, coherentes entre sí (cuadran al centavo). El caso oficial
+ * del docente no está en el repositorio; al tenerlo se sustituye SOLO este bloque y todos
+ * los libros, balanzas y estados que lo usen seguirán cuadrando.
+ * Los montos se llevan en centavos enteros para que no haya errores de redondeo.
+ * ===================================================================================== */
+export type PartidaChero = { num: number; fecha: string; tipo: string; concepto: string; suc: string; estado?: "Contabilizada" | "Anulada"; lineas: Linea[] };
+const NOMBRE: Record<string, string> = {
+  "110101": "Caja general", "11010301": "Banco Agrícola · cuenta corriente", "110301": "Clientes locales", "1109": "Inventarios",
+  "1112": "Crédito Fiscal IVA", "120101": "Mobiliario y equipo de oficina", "1202": "Depreciación acumulada",
+  "210201": "Cuentas por Pagar Comerciales · Locales", "2106": "Débito Fiscal IVA", "2107": "Retenciones por pagar",
+  "3101": "Capital social", "3103": "Reserva legal", "3105": "Utilidades acumuladas", "6101": "Pérdidas y Ganancias",
+  "4107": "Gasto por impuesto sobre la renta", "2108": "Impuesto sobre la renta por pagar", "4104": "Costo de Ventas", "4105": "Gastos de venta", "4106": "Gastos de administración", "5101": "Ventas",
+};
+const c = (cod: string, d: number, h = 0): Linea => ({ c: cod, n: NOMBRE[cod], d, h });
+const h = (cod: string, v: number): Linea => c(cod, 0, v);
+
+export const PARTIDAS_CHERO: PartidaChero[] = [
+  { num: 1, fecha: "01/11/2026", tipo: "Apertura", concepto: "Partida de apertura", suc: "Casa matriz",
+    lineas: [c("110101", 5000), c("11010301", 20000), c("1109", 30000), c("120101", 8000), h("3101", 63000)] },
+  { num: 2, fecha: "02/11/2026", tipo: "Operación", concepto: "Compra de teléfonos al crédito", suc: "Casa matriz",
+    lineas: [c("1109", 10000), c("1112", 1300), h("210201", 11300)] },
+  { num: 3, fecha: "04/11/2026", tipo: "Operación", concepto: "Venta al contado", suc: "Metrocentro",
+    lineas: [c("110101", 6780), h("5101", 6000), h("2106", 780)] },
+  { num: 4, fecha: "04/11/2026", tipo: "Operación", concepto: "Costo de la venta al contado", suc: "Metrocentro",
+    lineas: [c("4104", 3600), h("1109", 3600)] },
+  { num: 5, fecha: "06/11/2026", tipo: "Operación", concepto: "Venta al crédito", suc: "Casa matriz",
+    lineas: [c("110301", 5650), h("5101", 5000), h("2106", 650)] },
+  { num: 6, fecha: "06/11/2026", tipo: "Operación", concepto: "Costo de la venta al crédito", suc: "Casa matriz",
+    lineas: [c("4104", 3000), h("1109", 3000)] },
+  { num: 7, fecha: "09/11/2026", tipo: "Operación", concepto: "Pago de alquiler del local", suc: "Metrocentro",
+    lineas: [c("4106", 800), c("1112", 104), h("11010301", 904)] },
+  { num: 8, fecha: "10/11/2026", tipo: "Operación", concepto: "Pago parcial a proveedor", suc: "Casa matriz",
+    lineas: [c("210201", 5000), h("11010301", 5000)] },
+  { num: 9, fecha: "12/11/2026", tipo: "Operación", concepto: "Cobro a cliente (incluye un anticipo)", suc: "Casa matriz",
+    lineas: [c("11010301", 6000), h("110301", 6000)] },
+  { num: 10, fecha: "13/11/2026", tipo: "Operación", concepto: "Pago de energía eléctrica", suc: "Metrocentro",
+    lineas: [c("4106", 120), h("11010301", 120)] },
+  { num: 11, fecha: "13/11/2026", tipo: "Reversión", concepto: "Reversión de la partida n.º 10", suc: "Metrocentro",
+    lineas: [c("11010301", 120), h("4106", 120)] },
+  { num: 12, fecha: "15/11/2026", tipo: "Operación", concepto: "Sueldos del personal de ventas", suc: "Casa matriz",
+    lineas: [c("4105", 1500), h("2107", 150), h("11010301", 1350)] },
+  { num: 13, fecha: "16/11/2026", tipo: "Ajuste", concepto: "Depreciación de mobiliario", suc: "Casa matriz",
+    lineas: [c("4106", 200), h("1202", 200)] },
+];
+/** La partida 10 quedó anulada por la 11; el resto está contabilizada. */
+PARTIDAS_CHERO.forEach((p) => { p.estado = p.num === 10 ? "Anulada" : "Contabilizada"; });
+
+export type SaldoChero = { c: string; n: string; d: number; h: number };
+/** Totales de debe y haber por cuenta (incluye anuladas y reversiones, como pide la regla de reportes). */
+export function balanzaChero(): SaldoChero[] {
+  const m = new Map<string, SaldoChero>();
+  for (const p of PARTIDAS_CHERO) for (const l of p.lineas) {
+    const s = m.get(l.c) ?? { c: l.c, n: l.n, d: 0, h: 0 };
+    s.d += l.d; s.h += l.h; m.set(l.c, s);
+  }
+  return [...m.values()].sort((a, b) => a.c.localeCompare(b.c, "en", { numeric: true }));
+}
+
+/* =====================================================================================
+ * Catálogos maestros (Sprint 2). Todos los NIT, NRC, DUI y números son inventados.
+ * ===================================================================================== */
+export type Clasificacion = "Gran contribuyente" | "Mediano contribuyente" | "Otro contribuyente";
+export type Tercero = { id: string; tipo: "Cliente" | "Proveedor"; nombre: string; nit: string; nrc: string; actividad: string; clase: Clasificacion };
+export const TERCEROS: Tercero[] = [
+  { id: "t1", tipo: "Cliente", nombre: "Comunicaciones Chávez, S.A. de C.V.", nit: "0614-150392-101-3", nrc: "245871-4", actividad: "Venta de equipo de comunicación", clase: "Mediano contribuyente" },
+  { id: "t2", tipo: "Cliente", nombre: "Distribuidora Lemus", nit: "1217-020185-102-6", nrc: "188204-0", actividad: "Comercio al por mayor", clase: "Otro contribuyente" },
+  { id: "t3", tipo: "Cliente", nombre: "Grupo Cuscatlán Retail, S.A.", nit: "0614-301100-104-2", nrc: "301552-9", actividad: "Tiendas departamentales", clase: "Gran contribuyente" },
+  { id: "t4", tipo: "Proveedor", nombre: "Tecno Importaciones, S.A. de C.V.", nit: "0614-110778-103-5", nrc: "112340-6", actividad: "Importación de teléfonos celulares", clase: "Gran contribuyente" },
+  { id: "t5", tipo: "Proveedor", nombre: "Accesorios del Pacífico, S.A. de C.V.", nit: "0210-220990-105-1", nrc: "267019-3", actividad: "Accesorios para telefonía", clase: "Mediano contribuyente" },
+  { id: "t6", tipo: "Proveedor", nombre: "Inmobiliaria Metrocentro", nit: "0614-050465-001-8", nrc: "9034-2", actividad: "Arrendamiento de locales", clase: "Otro contribuyente" },
+];
+
+export type Producto = { id: string; codigo: string; nombre: string; categoria: string; unidad: string; minimo: number; metodo: "Costo promedio" | "PEPS"; existencia: number; movimientos: boolean };
+export const CATEGORIAS = ["Teléfonos", "Accesorios", "Repuestos"];
+export const PRODUCTOS: Producto[] = [
+  { id: "pr1", codigo: "TEL-001", nombre: "Teléfono gama media 128 GB", categoria: "Teléfonos", unidad: "Unidad", minimo: 10, metodo: "Costo promedio", existencia: 64, movimientos: true },
+  { id: "pr2", codigo: "TEL-002", nombre: "Teléfono gama alta 256 GB", categoria: "Teléfonos", unidad: "Unidad", minimo: 5, metodo: "Costo promedio", existencia: 18, movimientos: true },
+  { id: "pr3", codigo: "ACC-010", nombre: "Funda protectora universal", categoria: "Accesorios", unidad: "Unidad", minimo: 40, metodo: "PEPS", existencia: 35, movimientos: true },
+  { id: "pr4", codigo: "ACC-014", nombre: "Cargador rápido USB-C", categoria: "Accesorios", unidad: "Unidad", minimo: 25, metodo: "PEPS", existencia: 120, movimientos: false },
+  { id: "pr5", codigo: "REP-003", nombre: "Pantalla de repuesto gama media", categoria: "Repuestos", unidad: "Unidad", minimo: 8, metodo: "Costo promedio", existencia: 6, movimientos: true },
+];
+
+export type Empleado = { id: string; nombre: string; dui: string; nit: string; isss: string; nup: string; cargo: string; salario: number; ingreso: string; suc: string };
+export const EMPLEADOS: Empleado[] = [
+  { id: "e1", nombre: "Ana Beatriz Quintanilla", dui: "04512398-7", nit: "0614-220994-107-2", isss: "104522981", nup: "201905511203", cargo: "Gerente de tienda", salario: 1250, ingreso: "15/03/2024", suc: "Casa matriz" },
+  { id: "e2", nombre: "Jorge Alberto Mendoza", dui: "03877412-1", nit: "0614-090391-110-4", isss: "104881332", nup: "201807740918", cargo: "Vendedor", salario: 620, ingreso: "02/09/2024", suc: "Metrocentro" },
+  { id: "e3", nombre: "Karla Patricia Ruiz", dui: "05120987-3", nit: "0614-171096-103-9", isss: "105077645", nup: "202011203347", cargo: "Vendedora", salario: 600, ingreso: "10/01/2025", suc: "Metrocentro" },
+  { id: "e4", nombre: "Luis Fernando Orellana", dui: "02944610-5", nit: "0614-050288-102-6", isss: "103390124", nup: "201512309855", cargo: "Bodeguero", salario: 540, ingreso: "21/06/2023", suc: "Casa matriz" },
+];
+
+export type Tramo = { desde: number; hasta: number | null; pct: number; cuota: number };
+export type VigenciaTasas = { desde: string; isssLab: number; isssPat: number; isssTecho: number; afpLab: number; afpPat: number; tramos: Tramo[] };
+/** Valores ilustrativos para el diseño; la carga real usa la normativa vigente (HU-71). */
+export const TASAS: VigenciaTasas[] = [{
+  desde: "01/01/2026", isssLab: 3, isssPat: 7.5, isssTecho: 1000, afpLab: 7.25, afpPat: 8.75,
+  tramos: [{ desde: 0.01, hasta: 472, pct: 0, cuota: 0 }, { desde: 472.01, hasta: 895.24, pct: 10, cuota: 17.67 }, { desde: 895.25, hasta: 2038.1, pct: 20, cuota: 60 }, { desde: 2038.11, hasta: null, pct: 30, cuota: 288.57 }],
+}];
+
+export type CuentaTesoreria = { id: string; tipo: "Caja general" | "Caja chica" | "Cuenta bancaria"; nombre: string; cuenta: string; banco?: string; numero?: string };
+export const TESORERIA: CuentaTesoreria[] = [
+  { id: "c1", tipo: "Caja general", nombre: "Caja general · Casa matriz", cuenta: "110101" },
+  { id: "c2", tipo: "Caja chica", nombre: "Caja chica · Metrocentro", cuenta: "110102" },
+  { id: "c3", tipo: "Cuenta bancaria", nombre: "Banco Agrícola · cuenta corriente", cuenta: "11010301", banco: "Banco Agrícola", numero: "•••• 4471" },
+  { id: "c4", tipo: "Cuenta bancaria", nombre: "Banco Cuscatlán · cuenta de ahorro", cuenta: "11010302", banco: "Banco Cuscatlán", numero: "•••• 9028" },
+];
+
+export type ActivoFijo = { id: string; codigo: string; nombre: string; categoria: string; costo: number; fecha: string; residual: number; vida: number; suc: string; cuenta: string; baja?: string };
+export const ACTIVOS: ActivoFijo[] = [
+  { id: "a1", codigo: "MOB-001", nombre: "Mostradores de exhibición", categoria: "Mobiliario y equipo", costo: 3600, fecha: "01/11/2026", residual: 0, vida: 5, suc: "Casa matriz", cuenta: "120101" },
+  { id: "a2", codigo: "MOB-002", nombre: "Vitrinas de seguridad", categoria: "Mobiliario y equipo", costo: 2400, fecha: "01/11/2026", residual: 0, vida: 5, suc: "Metrocentro", cuenta: "120101" },
+  { id: "a3", codigo: "EQP-001", nombre: "Equipo de cómputo", categoria: "Mobiliario y equipo", costo: 2000, fecha: "01/11/2026", residual: 200, vida: 3, suc: "Casa matriz", cuenta: "120101" },
+];
