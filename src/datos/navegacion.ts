@@ -135,9 +135,9 @@ export const SPRINTS: { s: number; meta: string; fechas: string; pantallas: Pant
   {
     s: 2,
     meta: "Edición y anulación de partidas, libros, balanzas, estados básicos y cierre.",
-    fechas: "Por planificar",
+    fechas: "17 al 23 de noviembre de 2026",
     pantallas: [
-      { n: "Detalle de partida", hu: "HU-23 · HU-24", desc: "Versiones, anulación por reversión con motivo." },
+      { n: "Detalle de partida", ruta: "/partidas/p5", hu: "HU-23 · HU-24", desc: "Versiones, anulación por reversión con motivo." },
       { n: "Parámetros de la empresa", hu: "HU-12", desc: "Numeración, formato de estados y valuación." },
       { n: "Libro diario", hu: "HU-25", desc: "Formato de clase con folio, Vienen y Pasan." },
       { n: "Libro mayor", hu: "HU-27 · HU-28 · HU-29", desc: "Columnar y esquemas T, saldo contrario." },

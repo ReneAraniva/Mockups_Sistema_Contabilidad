@@ -1,10 +1,10 @@
 import { useMemo, useRef, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { CircleAlert, CircleCheck, Plus, Search, X } from "lucide-react";
 import { PERIODOS, useApp } from "../contexto";
 import { PARTIDAS, TIPOS_PARTIDA, imputables, type Linea } from "../datos/ejemplo";
 import { Marco, Permiso } from "../marco/Marco";
-import { Aviso, Boton, BotonIcono, Campo, Dialogo, Entrada, Etiqueta, Flotante, Pagina, Selector, Tarjeta, cx, dinero } from "../ui";
+import { Area, Aviso, Boton, BotonIcono, Campo, Dialogo, Entrada, Etiqueta, Flotante, Pagina, Selector, Tarjeta, cx, dinero } from "../ui";
 
 const aCentavos = (s: string) => Math.round((parseFloat(s.replace(/,/g, "")) || 0) * 100);
 const formato = (c: number) => (c ? dinero(c / 100) : "");
@@ -17,7 +17,12 @@ export function PartidaEditor() {
   const { periodo, avisar, puede } = useApp();
   const base = PARTIDAS.find((p) => p.id === id);
   const abierto = PERIODOS.find((p) => p.n === periodo)?.abierto ?? true;
-  const soloVer = !!base && base.estado !== "Borrador" || puede("consulta");
+  /** HU-23: editar una partida contabilizada crea una versión nueva y exige motivo. */
+  const nuevaVersion = useLocation().pathname.endsWith("/editar") && base?.estado === "Contabilizada";
+  const soloVer = (!!base && base.estado !== "Borrador" && !nuevaVersion) || puede("consulta");
+  const [motivo, setMotivo] = useState("");
+  const motivoOk = motivo.trim().length >= 10;
+  const nVersion = (base?.versiones?.length ?? 1) + 1;
 
   const [fecha, setFecha] = useState(base?.fecha ?? "09/11/2026");
   const [tipo, setTipo] = useState(base?.tipo ?? "Operación");
@@ -42,10 +47,10 @@ export function PartidaEditor() {
     setFilas((fs) => fs.map((f, j) => (j === i ? { ...f, [campo]: v.replace(/[^\d.,]/g, ""), ...(v ? { [campo === "d" ? "h" : "d"]: "" } : {}) } : f)));
   const pulir = (i: number, campo: "d" | "h") => setFilas((fs) => fs.map((f, j) => (j === i ? { ...f, [campo]: formato(aCentavos(f[campo])) } : f)));
 
-  const titulo = base ? (base.num ? `Partida n.º ${base.num}` : "Borrador de partida") : "Nueva partida";
+  const titulo = nuevaVersion ? `Editar partida n.º ${base!.num}` : base ? (base.num ? `Partida n.º ${base.num}` : "Borrador de partida") : "Nueva partida";
 
   return (
-    <Marco ruta={[{ t: "Partidas", a: "/partidas" }, { t: titulo }]}>
+    <Marco ruta={nuevaVersion ? [{ t: "Partidas", a: "/partidas" }, { t: `Partida n.º ${base!.num}`, a: `/partidas/${base!.id}` }, { t: "Editar" }] : [{ t: "Partidas", a: "/partidas" }, { t: titulo }]}>
       <Pagina ancho="max-w-[1200px]">
         <div className="flex items-end justify-between gap-4 flex-wrap">
           <h1 className="text-[28px] sm:text-[32px] font-normal tracking-tight">{titulo}</h1>
@@ -55,7 +60,7 @@ export function PartidaEditor() {
         </div>
 
         {!abierto && <Aviso mal>{periodo} está cerrado. No se pueden registrar ni editar partidas en él; elige un período abierto en el encabezado.</Aviso>}
-        {soloVer && base?.estado !== "Borrador" && base && <Aviso>Las partidas contabilizadas se editan con historial y se anulan por reversión (Sprint 2).</Aviso>}
+        {nuevaVersion && <Aviso>Al guardar se crea la <b className="font-semibold">versión {nVersion}</b>. La versión {nVersion - 1} se conserva en el historial y el número de partida no cambia.</Aviso>}
 
         <Tarjeta className="p-5 grid gap-4">
           <div className="grid gap-4 grid-cols-2 md:grid-cols-[160px_200px_minmax(0,1fr)]">
@@ -102,6 +107,15 @@ export function PartidaEditor() {
           </div>
         </Tarjeta>
 
+        {nuevaVersion && (
+          <Tarjeta className="p-5">
+            <Campo label="Motivo del cambio" ayuda="Mínimo 10 caracteres · queda en el historial y en la bitácora"
+              error={motivo.length > 0 && !motivoOk ? `Faltan ${10 - motivo.trim().length} caracteres.` : undefined}>
+              <Area rows={2} value={motivo} onChange={(e) => setMotivo(e.target.value)} placeholder="Ej. La cuenta correcta es Gastos de administración." />
+            </Campo>
+          </Tarjeta>
+        )}
+
         <Flotante abierto={buscar} onCerrar={() => { setBuscar(false); setQ(""); }} ancla={ancla} ancho={420} alinear="izq">
           <div className="relative m-1 mb-2">
             <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-texto3" />
@@ -132,6 +146,13 @@ export function PartidaEditor() {
                   <span className="inline-flex items-center gap-2 h-9 px-3.5 rounded-full bg-tarjeta2 text-texto text-sm font-semibold"><CircleCheck size={16} />La partida cuadra</span>
                 )}
             </div>
+            {nuevaVersion ? (
+              <div className="grid grid-cols-2 gap-2 sm:flex">
+                <Boton v="fan" onClick={() => ir(`/partidas/${base!.id}`)}>Cancelar</Boton>
+                <Boton v="pri" disabled={!cuadra || !motivoOk || !abierto} title={!cuadra ? "Debe y haber tienen que ser iguales" : undefined}
+                  onClick={() => { avisar(`Versión ${nVersion} guardada en la partida n.º ${base!.num}`); ir(`/partidas/${base!.id}`); }}>Guardar versión {nVersion}</Boton>
+              </div>
+            ) : (
             <div className="grid grid-cols-2 gap-2 sm:flex">
               <Boton v="fan" onClick={() => setSalir(true)}>Cancelar</Boton>
               <Boton disabled={!abierto || !filas.length} onClick={() => { avisar("Borrador guardado en la bandeja de pendientes"); ir("/pendientes"); }}>Guardar borrador</Boton>
@@ -140,6 +161,7 @@ export function PartidaEditor() {
                   title={!cuadra ? "Debe y haber tienen que ser iguales" : undefined}>Contabilizar</Boton>
               </Permiso>
             </div>
+            )}
           </div>
         )}
         <Permiso roles={["auxiliar"]}><p className="text-xs text-texto3 text-right -mt-2">Un contador revisará y contabilizará tu borrador.</p></Permiso>
@@ -147,7 +169,7 @@ export function PartidaEditor() {
 
       <Dialogo abierto={confirmar} onCerrar={() => setConfirmar(false)} titulo="¿Contabilizar la partida?"
         sub="Pasará al libro diario con el siguiente número correlativo y ya no podrá eliminarse."
-        pie={<><Boton v="fan" onClick={() => setConfirmar(false)}>Cancelar</Boton><Boton v="pri" onClick={() => { avisar("Partida n.º 8 contabilizada"); ir("/partidas"); }}>Contabilizar como n.º 8</Boton></>}>
+        pie={<><Boton v="fan" onClick={() => setConfirmar(false)}>Cancelar</Boton><Boton v="pri" onClick={() => { avisar(`Partida n.º ${PARTIDAS.reduce((m, x) => Math.max(m, x.num ?? 0), 0) + 1} contabilizada`); ir("/partidas"); }}>Contabilizar como n.º {PARTIDAS.reduce((m, x) => Math.max(m, x.num ?? 0), 0) + 1}</Boton></>}>
         <div className="grid grid-cols-2 gap-3 text-sm">
           <div className="bg-fondo rounded-xl p-3"><span className="text-texto3 block text-xs">Fecha y tipo</span>{fecha} · {tipo}</div>
           <div className="bg-fondo rounded-xl p-3"><span className="text-texto3 block text-xs">Total</span><span className="cifra font-semibold">US$ {dinero(td / 100)}</span></div>

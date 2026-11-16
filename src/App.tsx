@@ -10,7 +10,9 @@ import { Login, Recuperar } from "./pantallas/Acceso";
 import { Catalogo } from "./pantallas/Catalogo";
 import { Importar } from "./pantallas/Importar";
 import { Bitacora, Empresa, Periodos, Sucursales, Usuarios } from "./pantallas/Organizacion";
+import { PartidaDetalle } from "./pantallas/PartidaDetalle";
 import { PartidaEditor } from "./pantallas/PartidaEditor";
+import { PARTIDAS } from "./datos/ejemplo";
 import { Partidas, Pendientes } from "./pantallas/Partidas";
 import { Tablero } from "./pantallas/Tablero";
 import { Pagina } from "./ui";
@@ -47,7 +49,13 @@ function VentanaPrincipal({ children }: { children: ReactNode }) {
   return enMarco ? null : <>{children}</>;
 }
 
-function EditorPorId() { const { id } = useParams(); return <PartidaEditor key={id} />; }
+/** Los borradores se editan; las contabilizadas y anuladas se consultan en su detalle (HU-23 · HU-24). */
+function PartidaPorId() {
+  const { id } = useParams();
+  const base = PARTIDAS.find((x) => x.id === id);
+  return !base || base.estado !== "Borrador" ? <PartidaDetalle key={id} /> : <PartidaEditor key={id} />;
+}
+function EditarPorId() { const { id } = useParams(); return <PartidaEditor key={"v" + id} />; }
 
 const p = (ruta: string, el: ReactNode) => <Route key={ruta} path={ruta} element={<Protegida ruta={ruta}>{el}</Protegida>} />;
 
@@ -65,7 +73,8 @@ export default function App() {
           {p("/importar", <Importar />)}
           {p("/partidas", <Partidas />)}
           <Route path="/partidas/nueva" element={<PartidaEditor key="nueva" />} />
-          <Route path="/partidas/:id" element={<EditorPorId />} />
+          <Route path="/partidas/:id" element={<PartidaPorId />} />
+          <Route path="/partidas/:id/editar" element={<EditarPorId />} />
           {p("/pendientes", <Pendientes />)}
           {p("/periodos", <Periodos />)}
           {p("/empresa", <Empresa />)}
