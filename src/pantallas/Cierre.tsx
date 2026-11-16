@@ -3,7 +3,8 @@ import { Link } from "react-router-dom";
 import { ArrowLeft, ArrowRight, CircleAlert, CircleCheck, LockKeyholeOpen } from "lucide-react";
 import { useApp } from "../contexto";
 import { PARTIDAS_CHERO } from "../datos/ejemplo";
-import { EMPRESA_CHERO, TASA_ISR, TASA_RESERVA, calcularCierre, cent, enDinero } from "../datos/libros";
+import { PARAMS } from "../datos/parametros";
+import { EMPRESA_CHERO, calcularCierre, cent, enDinero } from "../datos/libros";
 import { Marco, Permiso } from "../marco/Marco";
 import { Area, Aviso, Boton, CabTarjeta, Campo, Dialogo, Etiqueta, Pagina, Pasos, Tarjeta, Titulo, cx, dinero } from "../ui";
 import { Cifra, TablaCifras } from "../ui/reportes";
@@ -85,12 +86,12 @@ export function Cierre() {
     /* 2 · ISR */
     <div key="i" className="grid gap-5">
       <Tarjeta className="overflow-hidden">
-        <CabTarjeta titulo="Cálculo del impuesto sobre la renta" sub={`Tasa ${TASA_ISR}% · se define en Parámetros de la empresa`} />
+        <CabTarjeta titulo="Cálculo del impuesto sobre la renta" sub={<>Tasa {PARAMS.isr}% · se define en <Link to="/parametros" className="underline underline-offset-4">Parámetros</Link></>} />
         <dl className="px-5 py-2 text-sm">
           {[
             ["Ingresos del ejercicio", cierre.totIng], ["(−) Costos y gastos", -cierre.totGas], ["Utilidad antes de impuesto", cierre.utilAntes],
-            [`(−) Impuesto sobre la renta ${TASA_ISR}%`, -cierre.isr], ["Utilidad neta", cierre.neta],
-            [`(−) Reserva legal ${TASA_RESERVA}% de la utilidad neta`, -cierre.reserva], ["Utilidad que pasa a utilidades acumuladas", cierre.acumulada],
+            [`(−) Impuesto sobre la renta ${PARAMS.isr}%`, -cierre.isr], ["Utilidad neta", cierre.neta],
+            [`(−) Reserva legal ${PARAMS.reserva}% de la utilidad neta`, -cierre.reserva], ["Utilidad que pasa a utilidades acumuladas", cierre.acumulada],
           ].map(([t, v], i) => (
             <div key={t as string} className={cx("flex justify-between gap-4 py-3 border-b border-borde last:border-0", [2, 4, 6].includes(i) && "font-bold")}>
               <dt>{t}</dt><dd><Cifra v={enDinero(v as number)} vacio="0.00" /></dd>

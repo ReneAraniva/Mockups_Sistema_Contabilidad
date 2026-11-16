@@ -44,7 +44,7 @@ export const MENU: { t: string; items: Opcion[] }[] = [
       { n: "Libro mayor", ruta: "/libro-mayor", ico: BookOpen, s: 2 },
       { n: "Balanzas de comprobación", ruta: "/balanzas", ico: Scale, s: 2 },
       { n: "Hoja de trabajo", ruta: "/hoja-trabajo", ico: LayoutGrid, s: 2 },
-      { n: "Estados financieros", ico: Receipt, s: 2 },
+      { n: "Estados financieros", ruta: "/estados", ico: Receipt, s: 2 },
       { n: "Razones y proyecciones", ico: ChartColumn, s: 4 },
     ],
   },
@@ -60,7 +60,7 @@ export const MENU: { t: string; items: Opcion[] }[] = [
   {
     t: "Comercial",
     items: [
-      { n: "Clientes y proveedores", ico: Users, s: 2 },
+      { n: "Clientes y proveedores", ruta: "/clientes", ico: Users, s: 2 },
       { n: "Compras", ico: ShoppingCart, s: 3 },
       { n: "Ventas", ico: Receipt, s: 3 },
       { n: "Cobros y pagos", ico: Wallet, s: 3 },
@@ -69,7 +69,7 @@ export const MENU: { t: string; items: Opcion[] }[] = [
   {
     t: "Inventario",
     items: [
-      { n: "Productos", ico: Package, s: 2 },
+      { n: "Productos", ruta: "/productos", ico: Package, s: 2 },
       { n: "Kardex", ico: LayoutGrid, s: 3 },
       { n: "Toma física", ico: ClipboardCheck, s: 4, roles: ["admin", "contador", "auxiliar"] },
     ],
@@ -77,7 +77,7 @@ export const MENU: { t: string; items: Opcion[] }[] = [
   {
     t: "Planilla",
     items: [
-      { n: "Empleados", ico: Users, s: 2, roles: ["admin", "contador"] },
+      { n: "Empleados y tasas", ruta: "/empleados", ico: Users, s: 2, roles: ["admin", "contador"] },
       { n: "Planilla y boletas", ico: Receipt, s: 3, roles: ["admin", "contador"] },
       { n: "Prestaciones", ico: CalendarDays, s: 3, roles: ["admin", "contador"] },
     ],
@@ -85,14 +85,14 @@ export const MENU: { t: string; items: Opcion[] }[] = [
   {
     t: "Tesorería",
     items: [
-      { n: "Caja y bancos", ico: Landmark, s: 2 },
+      { n: "Caja y bancos", ruta: "/caja-bancos", ico: Landmark, s: 2 },
       { n: "Conciliación bancaria", ico: ClipboardCheck, s: 3, roles: ["admin", "contador"] },
     ],
   },
   {
     t: "Activo fijo",
     items: [
-      { n: "Activos fijos", ico: Building2, s: 2 },
+      { n: "Activos fijos", ruta: "/activos", ico: Building2, s: 2 },
       { n: "Depreciación", ico: ChartColumn, s: 3, roles: ["admin", "contador"] },
     ],
   },
@@ -103,7 +103,7 @@ export const MENU: { t: string; items: Opcion[] }[] = [
       { n: "Sucursales", ruta: "/sucursales", ico: MapPin, s: 1 },
       { n: "Usuarios y roles", ruta: "/usuarios", ico: ShieldCheck, s: 1, roles: ["admin"] },
       { n: "Bitácora", ruta: "/bitacora", ico: History, s: 1, roles: ["admin", "contador", "consulta"] },
-      { n: "Parámetros", ico: SlidersHorizontal, s: 2, roles: ["admin"] },
+      { n: "Parámetros", ruta: "/parametros", ico: SlidersHorizontal, s: 2, roles: ["admin"] },
       { n: "Respaldos", ico: Archive, s: 3, roles: ["admin", "contador"] },
     ],
   },
@@ -138,17 +138,17 @@ export const SPRINTS: { s: number; meta: string; fechas: string; pantallas: Pant
     fechas: "17 al 23 de noviembre de 2026",
     pantallas: [
       { n: "Detalle de partida", ruta: "/partidas/p5", hu: "HU-23 · HU-24", desc: "Versiones, anulación por reversión con motivo." },
-      { n: "Parámetros de la empresa", hu: "HU-12", desc: "Numeración, formato de estados y valuación." },
+      { n: "Parámetros de la empresa", ruta: "/parametros", hu: "HU-12", desc: "Numeración, formato de estados y valuación." },
       { n: "Libro diario", ruta: "/libro-diario", hu: "HU-25", desc: "Formato de clase con folio, Vienen y Pasan." },
       { n: "Libro mayor", ruta: "/libro-mayor", hu: "HU-27 · HU-28 · HU-29", desc: "Columnar y esquemas T, saldo contrario." },
       { n: "Balanzas de comprobación", ruta: "/balanzas", hu: "HU-30", desc: "Antes de ajustes, ajustada y posterior al cierre." },
       { n: "Hoja de trabajo", ruta: "/hoja-trabajo", hu: "HU-31", desc: "Diez columnas con utilidad cuadrada." },
       { n: "Cierre de período y del ejercicio", ruta: "/cierre", hu: "HU-32 a HU-36", desc: "Asistente: ISR, cierre y reapertura." },
-      { n: "Estado de resultados y balance", hu: "HU-37 · HU-38 · HU-39", desc: "Por sucursal o consolidado, con firmas." },
-      { n: "Clientes y proveedores", hu: "HU-58", desc: "NIT, NRC y clasificación." },
-      { n: "Productos", hu: "HU-64", desc: "Categoría, mínimo y método de valuación." },
-      { n: "Empleados y tasas", hu: "HU-70 · HU-71", desc: "Datos de ISSS, AFP y tabla de renta." },
-      { n: "Caja, bancos y activos", hu: "HU-76 · HU-81", desc: "Cuentas de efectivo y registro de activos." },
+      { n: "Estado de resultados y balance", ruta: "/estados", hu: "HU-37 · HU-38 · HU-39", desc: "Por sucursal o consolidado, con firmas." },
+      { n: "Clientes y proveedores", ruta: "/clientes", hu: "HU-58", desc: "NIT, NRC y clasificación." },
+      { n: "Productos", ruta: "/productos", hu: "HU-64", desc: "Categoría, mínimo y método de valuación." },
+      { n: "Empleados y tasas", ruta: "/empleados", hu: "HU-70 · HU-71", desc: "Datos de ISSS, AFP y tabla de renta." },
+      { n: "Caja, bancos y activos", ruta: "/caja-bancos", hu: "HU-76 · HU-81", desc: "Cuentas de efectivo y registro de activos." },
     ],
   },
   {

@@ -8,6 +8,9 @@ import { Marco } from "./marco/Marco";
 import { Visor } from "./marco/Visor";
 import { Login, Recuperar } from "./pantallas/Acceso";
 import { Balanzas, HojaTrabajo } from "./pantallas/Balanzas";
+import { Estados } from "./pantallas/Estados";
+import { Activos, CajaBancos, Empleados, Productos, Terceros } from "./pantallas/Maestros";
+import { Parametros } from "./pantallas/Parametros";
 import { Catalogo } from "./pantallas/Catalogo";
 import { Cierre } from "./pantallas/Cierre";
 import { LibroDiario, LibroMayor } from "./pantallas/Libros";
@@ -85,6 +88,13 @@ export default function App() {
           {p("/libro-mayor", <LibroMayor />)}
           {p("/balanzas", <Balanzas />)}
           {p("/hoja-trabajo", <HojaTrabajo />)}
+          {p("/estados", <Estados />)}
+          {p("/parametros", <Parametros />)}
+          {p("/clientes", <Terceros />)}
+          {p("/productos", <Productos />)}
+          {p("/empleados", <Empleados />)}
+          {p("/caja-bancos", <CajaBancos />)}
+          {p("/activos", <Activos />)}
           {p("/empresa", <Empresa />)}
           {p("/sucursales", <Sucursales />)}
           {p("/usuarios", <Usuarios />)}

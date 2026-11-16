@@ -1,10 +1,9 @@
 import { CATALOGO, PARTIDAS_CHERO, imputables, type Linea, type PartidaChero } from "./ejemplo";
+import { PARAMS } from "./parametros";
 
 /* Cálculos de libros, balanzas, hoja de trabajo y cierre sobre el caso CheroPhonex.
  * Todo se hace en centavos enteros para que nada se descuadre por redondeo. */
 
-export const TASA_ISR = 25; // % sobre la utilidad antes de impuesto (ilustrativa; irá en Parámetros)
-export const TASA_RESERVA = 7; // % de la utilidad neta, reserva legal
 export const EMPRESA_CHERO = "CheroPhonex, S.A. de C.V.";
 
 export const cent = (n: number) => Math.round(n * 100);
@@ -47,9 +46,9 @@ export function calcularCierre() {
   const totIng = ingresos.reduce((t, x) => t + x.v, 0);
   const totGas = gastos.reduce((t, x) => t + x.v, 0);
   const utilAntes = totIng - totGas;
-  const isr = Math.max(Math.round((utilAntes * TASA_ISR) / 100), 0);
+  const isr = Math.max(Math.round((utilAntes * PARAMS.isr) / 100), 0);
   const neta = utilAntes - isr;
-  const reserva = Math.max(Math.round((neta * TASA_RESERVA) / 100), 0);
+  const reserva = Math.max(Math.round((neta * PARAMS.reserva) / 100), 0);
   const acumulada = neta - reserva;
 
   const lineasIsr: Linea[] = [L("4107", nombreDe("4107"), isr, 0), L("2108", nombreDe("2108"), 0, isr)];
@@ -149,3 +148,44 @@ export function mayorDe(cod: string) {
 export const cuentasConMovimiento = () => sumar(todas());
 /** Cuentas cuyo saldo final es contrario a su naturaleza (HU-29). */
 export const saldosContrarios = () => cuentasConMovimiento().filter((s) => saldoNat(s.c, s.d, s.h) < 0);
+
+/* ---------- Estados financieros (HU-37 · HU-38) ---------- */
+const FIN_NOV = 20261130;
+/** Saldos por cuenta de las partidas del caso entre dos fechas y, si se pide, de una sola sucursal.
+ *  La provisión del ISR es de la empresa completa: solo entra en el consolidado. */
+function saldosPeriodo(desde: number, hasta: number, suc: string): Map<string, Saldo> {
+  const ps = PARTIDAS_CHERO.filter((p) => {
+    const f = aNumFecha(p.fecha);
+    return (isNaN(desde) || f >= desde) && (isNaN(hasta) || f <= hasta) && (!suc || p.suc === suc);
+  });
+  const lineas = ps.flatMap((p) => p.lineas);
+  if (!suc && (isNaN(hasta) || hasta >= FIN_NOV)) lineas.push(...calcularCierre().lineasIsr);
+  return new Map(sumar(lineas).map((s) => [s.c, s]));
+}
+const porClase = (m: Map<string, Saldo>, pref: string, excluir: string[] = []) =>
+  [...m.values()].filter((s) => s.c.startsWith(pref) && !excluir.includes(s.c)).sort((a, b) => a.c.localeCompare(b.c, "en", { numeric: true }));
+const valor = (s: Saldo) => saldoNat(s.c, s.d, s.h);
+const total = (ls: Saldo[]) => ls.reduce((t, s) => t + valor(s), 0);
+
+export function estadoResultados(desde: string, hasta: string, suc: string) {
+  const m = saldosPeriodo(aNumFecha(desde), aNumFecha(hasta), suc);
+  const ventas = porClase(m, "5101"), otros = porClase(m, "5", ["5101"]);
+  const costo = porClase(m, "4104"), gastos = porClase(m, "4", ["4104", "4107"]), isr = porClase(m, "4107");
+  const bruta = total(ventas) - total(costo);
+  const operacion = bruta - total(gastos);
+  const antesIsr = operacion + total(otros);
+  const neta = antesIsr - total(isr);
+  return { ventas, costo, gastos, otros, isr, bruta, operacion, antesIsr, neta, valor, total };
+}
+
+export function balanceGeneral(hasta: string, suc: string) {
+  const m = saldosPeriodo(NaN, aNumFecha(hasta), suc);
+  const corriente = porClase(m, "11"), noCorriente = porClase(m, "12"), pasivo = porClase(m, "2"), capital = porClase(m, "3");
+  // En el activo todo se mide como debe − haber: la depreciación acumulada (acreedora) resta. Pasivo y patrimonio, al revés.
+  const vBalance = (s: Saldo) => (s.c.startsWith("1") ? s.d - s.h : s.h - s.d);
+  const tot = (ls: Saldo[]) => ls.reduce((t, s) => t + vBalance(s), 0);
+  const resultado = [...m.values()].filter((s) => /^[45]/.test(s.c)).reduce((t, s) => t + (s.h - s.d), 0);
+  const activo = tot(corriente) + tot(noCorriente);
+  const pasivoMasPatrimonio = tot(pasivo) + tot(capital) + resultado;
+  return { corriente, noCorriente, pasivo, capital, resultado, activo, pasivoMasPatrimonio, dif: activo - pasivoMasPatrimonio, valor: vBalance, total: tot };
+}

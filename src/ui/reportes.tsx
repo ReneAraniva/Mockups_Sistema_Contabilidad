@@ -44,7 +44,7 @@ export type ColCifras<T> = {
  * Tabla con cifras alineadas, encabezado fijo y fila de totales.
  * `fijarPrimera` deja la primera columna fija al desplazar horizontalmente (hoja de trabajo en celular).
  */
-export function TablaCifras<T>({ cols, filas, clave, fijarPrimera, totales = "Totales", vacio = "Sin movimientos en el período.", onFila, resaltar, claseFila, grupos, pie }: {
+export function TablaCifras<T>({ cols, filas, clave, fijarPrimera, totales = "Totales", vacio = "Sin movimientos en el período.", onFila, resaltar, claseFila, grupos, pie, tarjeta }: {
   cols: ColCifras<T>[]; filas: T[]; clave: (f: T) => string; fijarPrimera?: boolean; totales?: string | false;
   vacio?: string; onFila?: (f: T) => void; resaltar?: (f: T) => boolean;
   /** Clases extra por fila (por ejemplo, negrita en «Vienen» y «Pasan»). */
@@ -53,11 +53,37 @@ export function TablaCifras<T>({ cols, filas, clave, fijarPrimera, totales = "To
   grupos?: { t: string; n: number }[];
   /** Filas de cierre bajo los totales (por ejemplo, utilidad cuadrada y sumas iguales). */
   pie?: ReactNode;
+  /** Si se da, en celular la tabla se reemplaza por tarjetas con el estilo del listado de partidas. */
+  tarjeta?: (f: T) => TarjetaMovil;
 }) {
   const hayTotales = totales !== false && cols.some((c) => c.total !== undefined);
   const fija = (i: number, fondo: string) => (fijarPrimera && i === 0 ? cx("sticky left-0 z-[1] border-r border-borde", fondo) : "");
   return (
-    <div className="overflow-x-auto">
+    <>
+    {tarjeta && (
+      <ul className="md:hidden" aria-label="Listado">
+        {filas.map((f) => {
+          const t = tarjeta(f);
+          const cuerpo = (
+            <>
+              <div className="flex justify-between items-center gap-2"><span className="text-xs text-texto3 cifra min-w-0 truncate">{t.meta}</span>{t.estado}</div>
+              <div className="flex justify-between gap-3 mt-1.5"><span className="min-w-0 truncate">{t.titulo}</span>{t.valor !== undefined && <span className="cifra font-semibold whitespace-nowrap">{t.valor}</span>}</div>
+              {t.detalle && <div className="text-xs text-texto2 mt-1 truncate">{t.detalle}</div>}
+            </>
+          );
+          return (
+            <li key={clave(f)} className="border-b border-borde last:border-0">
+              {onFila ? <button type="button" onClick={() => onFila(f)} className="block w-full text-left px-4 py-3.5">{cuerpo}</button> : <div className="px-4 py-3.5">{cuerpo}</div>}
+            </li>
+          );
+        })}
+        {!filas.length && <li className="p-12 text-center text-texto2">{vacio}</li>}
+        {hayTotales && filas.length > 0 && cols.filter((c) => c.total !== undefined).map((c) => (
+          <li key={c.clave} className="flex justify-between px-4 py-3.5 border-t border-bordef font-bold"><span>{cols.filter((x) => x.total !== undefined).length === 1 ? totales : `${totales} · ${c.titulo}`}</span><span className="cifra">{dinero(c.total!)}</span></li>
+        ))}
+      </ul>
+    )}
+    <div className={cx("overflow-x-auto", tarjeta && "hidden md:block")}>
       <table className="w-full border-collapse">
         <thead>
           {grupos && (
@@ -98,8 +124,12 @@ export function TablaCifras<T>({ cols, filas, clave, fijarPrimera, totales = "To
         {pie}
       </table>
     </div>
+    </>
   );
 }
+
+/** Contenido de una tarjeta móvil: línea de contexto, estado, título, cifra y detalle. */
+export type TarjetaMovil = { meta: ReactNode; estado?: ReactNode; titulo: ReactNode; valor?: ReactNode; detalle?: ReactNode };
 
 /** Indica si un reporte cuadra; si no, avisa con la diferencia (RNF-01). */
 export function Cuadre({ d, h, etiqueta = "Debe y haber" }: { d: number; h: number; etiqueta?: string }) {

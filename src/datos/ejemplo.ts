@@ -185,3 +185,58 @@ export function balanzaChero(): SaldoChero[] {
   }
   return [...m.values()].sort((a, b) => a.c.localeCompare(b.c, "en", { numeric: true }));
 }
+
+/* =====================================================================================
+ * Catálogos maestros (Sprint 2). Todos los NIT, NRC, DUI y números son inventados.
+ * ===================================================================================== */
+export type Clasificacion = "Gran contribuyente" | "Mediano contribuyente" | "Otro contribuyente";
+export type Tercero = { id: string; tipo: "Cliente" | "Proveedor"; nombre: string; nit: string; nrc: string; actividad: string; clase: Clasificacion };
+export const TERCEROS: Tercero[] = [
+  { id: "t1", tipo: "Cliente", nombre: "Comunicaciones Chávez, S.A. de C.V.", nit: "0614-150392-101-3", nrc: "245871-4", actividad: "Venta de equipo de comunicación", clase: "Mediano contribuyente" },
+  { id: "t2", tipo: "Cliente", nombre: "Distribuidora Lemus", nit: "1217-020185-102-6", nrc: "188204-0", actividad: "Comercio al por mayor", clase: "Otro contribuyente" },
+  { id: "t3", tipo: "Cliente", nombre: "Grupo Cuscatlán Retail, S.A.", nit: "0614-301100-104-2", nrc: "301552-9", actividad: "Tiendas departamentales", clase: "Gran contribuyente" },
+  { id: "t4", tipo: "Proveedor", nombre: "Tecno Importaciones, S.A. de C.V.", nit: "0614-110778-103-5", nrc: "112340-6", actividad: "Importación de teléfonos celulares", clase: "Gran contribuyente" },
+  { id: "t5", tipo: "Proveedor", nombre: "Accesorios del Pacífico, S.A. de C.V.", nit: "0210-220990-105-1", nrc: "267019-3", actividad: "Accesorios para telefonía", clase: "Mediano contribuyente" },
+  { id: "t6", tipo: "Proveedor", nombre: "Inmobiliaria Metrocentro", nit: "0614-050465-001-8", nrc: "9034-2", actividad: "Arrendamiento de locales", clase: "Otro contribuyente" },
+];
+
+export type Producto = { id: string; codigo: string; nombre: string; categoria: string; unidad: string; minimo: number; metodo: "Costo promedio" | "PEPS"; existencia: number; movimientos: boolean };
+export const CATEGORIAS = ["Teléfonos", "Accesorios", "Repuestos"];
+export const PRODUCTOS: Producto[] = [
+  { id: "pr1", codigo: "TEL-001", nombre: "Teléfono gama media 128 GB", categoria: "Teléfonos", unidad: "Unidad", minimo: 10, metodo: "Costo promedio", existencia: 64, movimientos: true },
+  { id: "pr2", codigo: "TEL-002", nombre: "Teléfono gama alta 256 GB", categoria: "Teléfonos", unidad: "Unidad", minimo: 5, metodo: "Costo promedio", existencia: 18, movimientos: true },
+  { id: "pr3", codigo: "ACC-010", nombre: "Funda protectora universal", categoria: "Accesorios", unidad: "Unidad", minimo: 40, metodo: "PEPS", existencia: 35, movimientos: true },
+  { id: "pr4", codigo: "ACC-014", nombre: "Cargador rápido USB-C", categoria: "Accesorios", unidad: "Unidad", minimo: 25, metodo: "PEPS", existencia: 120, movimientos: false },
+  { id: "pr5", codigo: "REP-003", nombre: "Pantalla de repuesto gama media", categoria: "Repuestos", unidad: "Unidad", minimo: 8, metodo: "Costo promedio", existencia: 6, movimientos: true },
+];
+
+export type Empleado = { id: string; nombre: string; dui: string; nit: string; isss: string; nup: string; cargo: string; salario: number; ingreso: string; suc: string };
+export const EMPLEADOS: Empleado[] = [
+  { id: "e1", nombre: "Ana Beatriz Quintanilla", dui: "04512398-7", nit: "0614-220994-107-2", isss: "104522981", nup: "201905511203", cargo: "Gerente de tienda", salario: 1250, ingreso: "15/03/2024", suc: "Casa matriz" },
+  { id: "e2", nombre: "Jorge Alberto Mendoza", dui: "03877412-1", nit: "0614-090391-110-4", isss: "104881332", nup: "201807740918", cargo: "Vendedor", salario: 620, ingreso: "02/09/2024", suc: "Metrocentro" },
+  { id: "e3", nombre: "Karla Patricia Ruiz", dui: "05120987-3", nit: "0614-171096-103-9", isss: "105077645", nup: "202011203347", cargo: "Vendedora", salario: 600, ingreso: "10/01/2025", suc: "Metrocentro" },
+  { id: "e4", nombre: "Luis Fernando Orellana", dui: "02944610-5", nit: "0614-050288-102-6", isss: "103390124", nup: "201512309855", cargo: "Bodeguero", salario: 540, ingreso: "21/06/2023", suc: "Casa matriz" },
+];
+
+export type Tramo = { desde: number; hasta: number | null; pct: number; cuota: number };
+export type VigenciaTasas = { desde: string; isssLab: number; isssPat: number; isssTecho: number; afpLab: number; afpPat: number; tramos: Tramo[] };
+/** Valores ilustrativos para el diseño; la carga real usa la normativa vigente (HU-71). */
+export const TASAS: VigenciaTasas[] = [{
+  desde: "01/01/2026", isssLab: 3, isssPat: 7.5, isssTecho: 1000, afpLab: 7.25, afpPat: 8.75,
+  tramos: [{ desde: 0.01, hasta: 472, pct: 0, cuota: 0 }, { desde: 472.01, hasta: 895.24, pct: 10, cuota: 17.67 }, { desde: 895.25, hasta: 2038.1, pct: 20, cuota: 60 }, { desde: 2038.11, hasta: null, pct: 30, cuota: 288.57 }],
+}];
+
+export type CuentaTesoreria = { id: string; tipo: "Caja general" | "Caja chica" | "Cuenta bancaria"; nombre: string; cuenta: string; banco?: string; numero?: string };
+export const TESORERIA: CuentaTesoreria[] = [
+  { id: "c1", tipo: "Caja general", nombre: "Caja general · Casa matriz", cuenta: "110101" },
+  { id: "c2", tipo: "Caja chica", nombre: "Caja chica · Metrocentro", cuenta: "110102" },
+  { id: "c3", tipo: "Cuenta bancaria", nombre: "Banco Agrícola · cuenta corriente", cuenta: "11010301", banco: "Banco Agrícola", numero: "•••• 4471" },
+  { id: "c4", tipo: "Cuenta bancaria", nombre: "Banco Cuscatlán · cuenta de ahorro", cuenta: "11010302", banco: "Banco Cuscatlán", numero: "•••• 9028" },
+];
+
+export type ActivoFijo = { id: string; codigo: string; nombre: string; categoria: string; costo: number; fecha: string; residual: number; vida: number; suc: string; cuenta: string; baja?: string };
+export const ACTIVOS: ActivoFijo[] = [
+  { id: "a1", codigo: "MOB-001", nombre: "Mostradores de exhibición", categoria: "Mobiliario y equipo", costo: 3600, fecha: "01/11/2026", residual: 0, vida: 5, suc: "Casa matriz", cuenta: "120101" },
+  { id: "a2", codigo: "MOB-002", nombre: "Vitrinas de seguridad", categoria: "Mobiliario y equipo", costo: 2400, fecha: "01/11/2026", residual: 0, vida: 5, suc: "Metrocentro", cuenta: "120101" },
+  { id: "a3", codigo: "EQP-001", nombre: "Equipo de cómputo", categoria: "Mobiliario y equipo", costo: 2000, fecha: "01/11/2026", residual: 200, vida: 3, suc: "Casa matriz", cuenta: "120101" },
+];
