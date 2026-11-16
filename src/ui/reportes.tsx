@@ -1,7 +1,7 @@
 import { useRef, useState, type ReactNode } from "react";
-import { CalendarDays, Download, FileSpreadsheet, FileText } from "lucide-react";
+import { CalendarDays, CircleCheck, Download, FileSpreadsheet, FileText } from "lucide-react";
 import { useApp } from "../contexto";
-import { Boton, Entrada, Flotante, OpcionFlot, Tarjeta, cx, dinero, td, th } from "./index";
+import { Aviso, Boton, Entrada, Flotante, OpcionFlot, Tarjeta, cx, dinero, td, th } from "./index";
 
 /* Componentes compartidos de los libros y reportes (Sprint 2). Solo diseño: nada se genera. */
 
@@ -44,9 +44,15 @@ export type ColCifras<T> = {
  * Tabla con cifras alineadas, encabezado fijo y fila de totales.
  * `fijarPrimera` deja la primera columna fija al desplazar horizontalmente (hoja de trabajo en celular).
  */
-export function TablaCifras<T>({ cols, filas, clave, fijarPrimera, totales = "Totales", vacio = "Sin movimientos en el período.", onFila, resaltar }: {
+export function TablaCifras<T>({ cols, filas, clave, fijarPrimera, totales = "Totales", vacio = "Sin movimientos en el período.", onFila, resaltar, claseFila, grupos, pie }: {
   cols: ColCifras<T>[]; filas: T[]; clave: (f: T) => string; fijarPrimera?: boolean; totales?: string | false;
   vacio?: string; onFila?: (f: T) => void; resaltar?: (f: T) => boolean;
+  /** Clases extra por fila (por ejemplo, negrita en «Vienen» y «Pasan»). */
+  claseFila?: (f: T) => string | false | undefined;
+  /** Encabezado agrupado sobre las columnas: `n` es cuántas columnas abarca cada grupo. */
+  grupos?: { t: string; n: number }[];
+  /** Filas de cierre bajo los totales (por ejemplo, utilidad cuadrada y sumas iguales). */
+  pie?: ReactNode;
 }) {
   const hayTotales = totales !== false && cols.some((c) => c.total !== undefined);
   const fija = (i: number, fondo: string) => (fijarPrimera && i === 0 ? cx("sticky left-0 z-[1] border-r border-borde", fondo) : "");
@@ -54,6 +60,13 @@ export function TablaCifras<T>({ cols, filas, clave, fijarPrimera, totales = "To
     <div className="overflow-x-auto">
       <table className="w-full border-collapse">
         <thead>
+          {grupos && (
+            <tr>
+              {grupos.map((g, i) => (
+                <th key={g.t + i} colSpan={g.n} className={cx(th, "text-center border-l border-borde", i === 0 && "text-left border-l-0", fijarPrimera && i === 0 && "sticky left-0 z-[2] bg-tarjeta")}>{g.t}</th>
+              ))}
+            </tr>
+          )}
           <tr>
             {cols.map((c, i) => (
               <th key={c.clave} className={cx(th, c.tipo === "num" && "text-right", c.ancho, fija(i, "bg-tarjeta"))}>{c.titulo}</th>
@@ -63,7 +76,7 @@ export function TablaCifras<T>({ cols, filas, clave, fijarPrimera, totales = "To
         <tbody>
           {filas.map((f) => (
             <tr key={clave(f)} onClick={onFila ? () => onFila(f) : undefined}
-              className={cx(onFila && "cursor-pointer hover:bg-white/[.02]", resaltar?.(f) && "bg-alertaf/40")}>
+              className={cx(onFila && "cursor-pointer hover:bg-white/[.02]", resaltar?.(f) && "bg-alertaf/40", claseFila?.(f))}>
               {cols.map((c, i) => (
                 <td key={c.clave} className={cx(td, c.tipo === "num" && "text-right whitespace-nowrap", fija(i, "bg-tarjeta"))}>{c.ver(f)}</td>
               ))}
@@ -82,9 +95,17 @@ export function TablaCifras<T>({ cols, filas, clave, fijarPrimera, totales = "To
             </tr>
           </tfoot>
         )}
+        {pie}
       </table>
     </div>
   );
+}
+
+/** Indica si un reporte cuadra; si no, avisa con la diferencia (RNF-01). */
+export function Cuadre({ d, h, etiqueta = "Debe y haber" }: { d: number; h: number; etiqueta?: string }) {
+  const dif = d - h;
+  if (!dif) return <span className="inline-flex items-center gap-2 h-9 px-3.5 rounded-full bg-tarjeta2 text-sm font-semibold"><CircleCheck size={16} />{etiqueta} cuadran · US$ {dinero(d / 100)}</span>;
+  return <Aviso mal><b className="font-semibold">No cuadra.</b> {etiqueta} difieren en US$ {dinero(Math.abs(dif) / 100)}. Revisa las partidas del período antes de usar este reporte.</Aviso>;
 }
 
 /* ---------- Exportar ---------- */

@@ -377,7 +377,7 @@ export function Periodos() {
             );
           })}
         </div>
-        <p className="text-xs text-texto3">El cierre de períodos y la reapertura se completan en el Sprint 2 (HU-32 y HU-33); aquí ya se ve su comportamiento.</p>
+        <p className="text-xs text-texto3">Para cerrar el ejercicio completo (impuesto, partida de cierre y reapertura) usa el <Link to="/cierre" className="underline underline-offset-4 font-semibold text-texto2">asistente de cierre</Link>.</p>
       </Pagina>
 
       <Dialogo abierto={crear} onCerrar={() => setCrear(false)} titulo="Crear ejercicio" sub="Se generan sus doce períodos mensuales, todos abiertos."

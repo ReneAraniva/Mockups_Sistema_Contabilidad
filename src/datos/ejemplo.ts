@@ -39,6 +39,7 @@ export const CATALOGO: Cuenta[] = [
       ]),
       k("2106", "Débito Fiscal IVA", "A", undefined, 2310.6),
       k("2107", "Retenciones por pagar", "A", undefined, 415.3),
+      k("2108", "Impuesto sobre la renta por pagar", "A", undefined, 0),
     ]),
   ]),
   k("3", "Patrimonio", "A", [
@@ -53,6 +54,7 @@ export const CATALOGO: Cuenta[] = [
       k("4104", "Costo de Ventas", "D", undefined, 31240.0),
       k("4105", "Gastos de venta", "D", undefined, 3410.8),
       k("4106", "Gastos de administración", "D", undefined, 5120.0),
+      k("4107", "Gasto por impuesto sobre la renta", "D", undefined, 0),
     ]),
   ]),
   k("5", "Cuentas de resultado acreedoras", "A", [
@@ -136,7 +138,8 @@ const NOMBRE: Record<string, string> = {
   "110101": "Caja general", "11010301": "Banco Agrícola · cuenta corriente", "110301": "Clientes locales", "1109": "Inventarios",
   "1112": "Crédito Fiscal IVA", "120101": "Mobiliario y equipo de oficina", "1202": "Depreciación acumulada",
   "210201": "Cuentas por Pagar Comerciales · Locales", "2106": "Débito Fiscal IVA", "2107": "Retenciones por pagar",
-  "3101": "Capital social", "4104": "Costo de Ventas", "4105": "Gastos de venta", "4106": "Gastos de administración", "5101": "Ventas",
+  "3101": "Capital social", "3103": "Reserva legal", "3105": "Utilidades acumuladas", "6101": "Pérdidas y Ganancias",
+  "4107": "Gasto por impuesto sobre la renta", "2108": "Impuesto sobre la renta por pagar", "4104": "Costo de Ventas", "4105": "Gastos de venta", "4106": "Gastos de administración", "5101": "Ventas",
 };
 const c = (cod: string, d: number, h = 0): Linea => ({ c: cod, n: NOMBRE[cod], d, h });
 const h = (cod: string, v: number): Linea => c(cod, 0, v);
@@ -158,8 +161,8 @@ export const PARTIDAS_CHERO: PartidaChero[] = [
     lineas: [c("4106", 800), c("1112", 104), h("11010301", 904)] },
   { num: 8, fecha: "10/11/2026", tipo: "Operación", concepto: "Pago parcial a proveedor", suc: "Casa matriz",
     lineas: [c("210201", 5000), h("11010301", 5000)] },
-  { num: 9, fecha: "12/11/2026", tipo: "Operación", concepto: "Cobro a cliente", suc: "Casa matriz",
-    lineas: [c("11010301", 2000), h("110301", 2000)] },
+  { num: 9, fecha: "12/11/2026", tipo: "Operación", concepto: "Cobro a cliente (incluye un anticipo)", suc: "Casa matriz",
+    lineas: [c("11010301", 6000), h("110301", 6000)] },
   { num: 10, fecha: "13/11/2026", tipo: "Operación", concepto: "Pago de energía eléctrica", suc: "Metrocentro",
     lineas: [c("4106", 120), h("11010301", 120)] },
   { num: 11, fecha: "13/11/2026", tipo: "Reversión", concepto: "Reversión de la partida n.º 10", suc: "Metrocentro",

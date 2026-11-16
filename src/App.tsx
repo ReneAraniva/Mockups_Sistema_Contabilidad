@@ -7,7 +7,10 @@ import { Indice } from "./marco/Indice";
 import { Marco } from "./marco/Marco";
 import { Visor } from "./marco/Visor";
 import { Login, Recuperar } from "./pantallas/Acceso";
+import { Balanzas, HojaTrabajo } from "./pantallas/Balanzas";
 import { Catalogo } from "./pantallas/Catalogo";
+import { Cierre } from "./pantallas/Cierre";
+import { LibroDiario, LibroMayor } from "./pantallas/Libros";
 import { Importar } from "./pantallas/Importar";
 import { Bitacora, Empresa, Periodos, Sucursales, Usuarios } from "./pantallas/Organizacion";
 import { PartidaDetalle } from "./pantallas/PartidaDetalle";
@@ -77,6 +80,11 @@ export default function App() {
           <Route path="/partidas/:id/editar" element={<EditarPorId />} />
           {p("/pendientes", <Pendientes />)}
           {p("/periodos", <Periodos />)}
+          {p("/cierre", <Cierre />)}
+          {p("/libro-diario", <LibroDiario />)}
+          {p("/libro-mayor", <LibroMayor />)}
+          {p("/balanzas", <Balanzas />)}
+          {p("/hoja-trabajo", <HojaTrabajo />)}
           {p("/empresa", <Empresa />)}
           {p("/sucursales", <Sucursales />)}
           {p("/usuarios", <Usuarios />)}
