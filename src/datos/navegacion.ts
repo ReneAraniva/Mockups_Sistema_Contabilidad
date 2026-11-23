@@ -24,7 +24,7 @@ export type Opcion = {
 
 /** Menú principal agrupado por módulo; respeta la matriz de permisos del levantamiento. */
 export const MENU: { t: string; items: Opcion[] }[] = [
-  { t: "General", items: [{ n: "Tablero", ruta: "/tablero", ico: House, s: 1 }] },
+  { t: "General", items: [{ n: "Tablero", ruta: "/tablero", ico: House, s: 1 }, { n: "Tablero con gráficas", ruta: "/indicadores", ico: ChartColumn, s: 4 }] },
   {
     t: "Contabilidad",
     items: [
@@ -34,7 +34,7 @@ export const MENU: { t: string; items: Opcion[] }[] = [
       { n: "Ejercicios y períodos", ruta: "/periodos", ico: CalendarDays, s: 1 },
       { n: "Importar desde Excel", ruta: "/importar", ico: Upload, s: 1, roles: ["admin", "contador"] },
       { n: "Cierre del ejercicio", ruta: "/cierre", ico: LockKeyhole, s: 2, roles: ["admin", "contador"] },
-      { n: "Partidas recurrentes", ico: Repeat, s: 4, roles: ["admin", "contador"] },
+      { n: "Partidas recurrentes", ruta: "/recurrentes", ico: Repeat, s: 4, roles: ["admin", "contador"] },
     ],
   },
   {
@@ -46,7 +46,9 @@ export const MENU: { t: string; items: Opcion[] }[] = [
       { n: "Hoja de trabajo", ruta: "/hoja-trabajo", ico: LayoutGrid, s: 2 },
       { n: "Estados financieros", ruta: "/estados", ico: Receipt, s: 2 },
       { n: "Patrimonio, flujo y comparativos", ruta: "/estados-adicionales", ico: TrendingUp, s: 3 },
-      { n: "Razones y proyecciones", ico: ChartColumn, s: 4 },
+      { n: "Razones y proyecciones", ruta: "/razones", ico: ChartColumn, s: 4 },
+      { n: "Notas a los estados", ruta: "/notas-estados", ico: FileText, s: 4 },
+      { n: "Firma digital", ruta: "/firma", ico: ShieldCheck, s: 4, roles: ["admin", "contador"] },
     ],
   },
   {
@@ -54,10 +56,10 @@ export const MENU: { t: string; items: Opcion[] }[] = [
     items: [
       { n: "Libros de IVA", ruta: "/libros-iva", ico: BookOpen, s: 3 },
       { n: "Declaraciones F-07 y F-14", ruta: "/declaraciones", ico: Calculator, s: 3, roles: ["admin", "contador", "consulta"] },
-      { n: "Calendario tributario", ico: CalendarDays, s: 4 },
+      { n: "Calendario tributario", ruta: "/calendario", ico: CalendarDays, s: 4 },
     ],
   },
-  { t: "Facturación", items: [{ n: "Documentos DTE", ico: Receipt, s: 4, roles: ["admin", "contador", "auxiliar"] }] },
+  { t: "Facturación", items: [{ n: "Documentos DTE", ruta: "/dte", ico: Receipt, s: 4, roles: ["admin", "contador", "auxiliar"] }] },
   {
     t: "Comercial",
     items: [
@@ -72,7 +74,7 @@ export const MENU: { t: string; items: Opcion[] }[] = [
     items: [
       { n: "Productos", ruta: "/productos", ico: Package, s: 2 },
       { n: "Kardex", ruta: "/kardex", ico: LayoutGrid, s: 3 },
-      { n: "Toma física", ico: ClipboardCheck, s: 4, roles: ["admin", "contador", "auxiliar"] },
+      { n: "Toma física", ruta: "/toma-fisica", ico: ClipboardCheck, s: 4, roles: ["admin", "contador", "auxiliar"] },
     ],
   },
   {
@@ -81,6 +83,7 @@ export const MENU: { t: string; items: Opcion[] }[] = [
       { n: "Empleados y tasas", ruta: "/empleados", ico: Users, s: 2, roles: ["admin", "contador"] },
       { n: "Planilla y boletas", ruta: "/planilla", ico: Receipt, s: 3, roles: ["admin", "contador"] },
       { n: "Prestaciones", ruta: "/prestaciones", ico: CalendarDays, s: 3, roles: ["admin", "contador"] },
+      { n: "Planillas ISSS y AFP", ruta: "/planillas-oficiales", ico: Receipt, s: 4, roles: ["admin", "contador"] },
     ],
   },
   {
@@ -172,15 +175,19 @@ export const SPRINTS: { s: number; meta: string; fechas: string; pantallas: Pant
   {
     s: 4,
     meta: "Facturación electrónica, análisis, firma digital y funciones complementarias.",
-    fechas: "Por planificar",
+    fechas: "1 al 4 de diciembre de 2026",
     pantallas: [
-      { n: "Documentos DTE", hu: "HU-53 a HU-57", desc: "Emisión, sello, QR e invalidación." },
-      { n: "Tablero con gráficas", hu: "HU-83", desc: "Indicadores por mes y sucursal." },
-      { n: "Razones y proyecciones", hu: "HU-84 · HU-85", desc: "Liquidez, rentabilidad y rangos de confianza." },
-      { n: "Firma y verificación", hu: "HU-87 · HU-88", desc: "Firma PAdES y portal público por QR." },
-      { n: "Perfil e idioma", hu: "HU-14 · HU-89", desc: "Español o inglés y modo didáctico." },
-      { n: "Calendario y anexos", hu: "HU-51 · HU-52", desc: "Vencimientos y CSV del F-07." },
-      { n: "Notas, recurrentes y más", hu: "HU-26 · HU-44 · HU-66 a HU-69 · HU-75 · HU-80", desc: "Funciones complementarias." },
+      { n: "Documentos DTE", ruta: "/dte", hu: "HU-53 a HU-57", desc: "Emisión, sello, QR e invalidación." },
+      { n: "Tablero con gráficas", ruta: "/indicadores", hu: "HU-83", desc: "Indicadores por mes y sucursal." },
+      { n: "Razones y proyecciones", ruta: "/razones", hu: "HU-84 · HU-85", desc: "Liquidez, rentabilidad y rangos de confianza." },
+      { n: "Firma y verificación", ruta: "/firma", hu: "HU-87 · HU-88", desc: "Firma PAdES y portal público por QR." },
+      { n: "Perfil e idioma", ruta: "/perfil", hu: "HU-14 · HU-89", desc: "Español o inglés y modo didáctico." },
+      { n: "Calendario y anexos", ruta: "/calendario", hu: "HU-51 · HU-52", desc: "Vencimientos y CSV del F-07." },
+      { n: "Notas a los estados", ruta: "/notas-estados", hu: "HU-44", desc: "Texto editable con las cifras llenadas por el sistema." },
+      { n: "Partidas recurrentes", ruta: "/recurrentes", hu: "HU-26", desc: "Plantillas que se generan solas cada mes." },
+      { n: "Toma física, series y reabastecimiento", ruta: "/toma-fisica", hu: "HU-66 a HU-69", desc: "Conteo, IMEI, alertas de mínimo y sistema analítico." },
+      { n: "Importar estado de cuenta", ruta: "/conciliacion", hu: "HU-80", desc: "CSV del banco emparejado con los movimientos." },
+      { n: "Planillas de ISSS y AFP", ruta: "/planillas-oficiales", hu: "HU-75", desc: "Cotizaciones del mes para presentar." },
     ],
   },
 ];

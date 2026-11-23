@@ -200,10 +200,10 @@ export function Marco({ ruta, children }: { ruta: { t: string; a?: string }[]; c
         <div className="flex items-center justify-between px-2.5 py-1.5">
           <span className="flex items-center gap-2 text-texto2 text-sm"><Globe size={16} />Idioma</span>
           <Segmento valor="es" opciones={[{ v: "es", t: "ES" }, { v: "en", t: "EN" }]}
-            onChange={(v) => v === "en" && avisar("La interfaz en inglés llega en el Sprint 4 (HU-14)")} />
+            onChange={(v) => v === "en" && ir("/perfil")} />
         </div>
         <div className="h-px bg-borde my-1.5" />
-        <OpcionFlot icono={<Settings size={16} />} onClick={() => avisar("El perfil se diseña en el Sprint 4")}>Mi perfil</OpcionFlot>
+        <OpcionFlot icono={<Settings size={16} />} onClick={() => ir("/perfil")}>Mi perfil</OpcionFlot>
         <OpcionFlot icono={<LogOut size={16} />} onClick={() => ir("/login")}>Cerrar sesión</OpcionFlot>
       </Flotante>
 
