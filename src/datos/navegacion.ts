@@ -1,7 +1,7 @@
 import {
   Archive, BookOpen, Building2, Calculator, CalendarDays, ChartColumn, ClipboardCheck,
   FileText, History, House, Inbox, Landmark, LayoutGrid, ListTree, LockKeyhole, MapPin, Package, Receipt,
-  Repeat, Scale, ShieldCheck, ShoppingCart, SlidersHorizontal, Upload, Users, Wallet, type LucideIcon,
+  Repeat, Scale, ShieldCheck, ShoppingCart, SlidersHorizontal, TrendingUp, Upload, Users, Wallet, type LucideIcon,
 } from "lucide-react";
 
 export type Rol = "admin" | "contador" | "auxiliar" | "consulta";
@@ -45,14 +45,15 @@ export const MENU: { t: string; items: Opcion[] }[] = [
       { n: "Balanzas de comprobación", ruta: "/balanzas", ico: Scale, s: 2 },
       { n: "Hoja de trabajo", ruta: "/hoja-trabajo", ico: LayoutGrid, s: 2 },
       { n: "Estados financieros", ruta: "/estados", ico: Receipt, s: 2 },
+      { n: "Patrimonio, flujo y comparativos", ruta: "/estados-adicionales", ico: TrendingUp, s: 3 },
       { n: "Razones y proyecciones", ico: ChartColumn, s: 4 },
     ],
   },
   {
     t: "Tributario",
     items: [
-      { n: "Libros de IVA", ico: BookOpen, s: 3 },
-      { n: "Declaraciones F-07 y F-14", ico: Calculator, s: 3, roles: ["admin", "contador", "consulta"] },
+      { n: "Libros de IVA", ruta: "/libros-iva", ico: BookOpen, s: 3 },
+      { n: "Declaraciones F-07 y F-14", ruta: "/declaraciones", ico: Calculator, s: 3, roles: ["admin", "contador", "consulta"] },
       { n: "Calendario tributario", ico: CalendarDays, s: 4 },
     ],
   },
@@ -61,16 +62,16 @@ export const MENU: { t: string; items: Opcion[] }[] = [
     t: "Comercial",
     items: [
       { n: "Clientes y proveedores", ruta: "/clientes", ico: Users, s: 2 },
-      { n: "Compras", ico: ShoppingCart, s: 3 },
-      { n: "Ventas", ico: Receipt, s: 3 },
-      { n: "Cobros y pagos", ico: Wallet, s: 3 },
+      { n: "Compras", ruta: "/compras", ico: ShoppingCart, s: 3 },
+      { n: "Ventas", ruta: "/ventas", ico: Receipt, s: 3 },
+      { n: "Cobros y pagos", ruta: "/cobros-pagos", ico: Wallet, s: 3 },
     ],
   },
   {
     t: "Inventario",
     items: [
       { n: "Productos", ruta: "/productos", ico: Package, s: 2 },
-      { n: "Kardex", ico: LayoutGrid, s: 3 },
+      { n: "Kardex", ruta: "/kardex", ico: LayoutGrid, s: 3 },
       { n: "Toma física", ico: ClipboardCheck, s: 4, roles: ["admin", "contador", "auxiliar"] },
     ],
   },
@@ -78,22 +79,22 @@ export const MENU: { t: string; items: Opcion[] }[] = [
     t: "Planilla",
     items: [
       { n: "Empleados y tasas", ruta: "/empleados", ico: Users, s: 2, roles: ["admin", "contador"] },
-      { n: "Planilla y boletas", ico: Receipt, s: 3, roles: ["admin", "contador"] },
-      { n: "Prestaciones", ico: CalendarDays, s: 3, roles: ["admin", "contador"] },
+      { n: "Planilla y boletas", ruta: "/planilla", ico: Receipt, s: 3, roles: ["admin", "contador"] },
+      { n: "Prestaciones", ruta: "/prestaciones", ico: CalendarDays, s: 3, roles: ["admin", "contador"] },
     ],
   },
   {
     t: "Tesorería",
     items: [
       { n: "Caja y bancos", ruta: "/caja-bancos", ico: Landmark, s: 2 },
-      { n: "Conciliación bancaria", ico: ClipboardCheck, s: 3, roles: ["admin", "contador"] },
+      { n: "Caja chica y conciliación", ruta: "/conciliacion", ico: ClipboardCheck, s: 3 },
     ],
   },
   {
     t: "Activo fijo",
     items: [
       { n: "Activos fijos", ruta: "/activos", ico: Building2, s: 2 },
-      { n: "Depreciación", ico: ChartColumn, s: 3, roles: ["admin", "contador"] },
+      { n: "Depreciación", ruta: "/depreciacion", ico: ChartColumn, s: 3, roles: ["admin", "contador"] },
     ],
   },
   {
@@ -104,7 +105,7 @@ export const MENU: { t: string; items: Opcion[] }[] = [
       { n: "Usuarios y roles", ruta: "/usuarios", ico: ShieldCheck, s: 1, roles: ["admin"] },
       { n: "Bitácora", ruta: "/bitacora", ico: History, s: 1, roles: ["admin", "contador", "consulta"] },
       { n: "Parámetros", ruta: "/parametros", ico: SlidersHorizontal, s: 2, roles: ["admin"] },
-      { n: "Respaldos", ico: Archive, s: 3, roles: ["admin", "contador"] },
+      { n: "Respaldos", ruta: "/respaldos", ico: Archive, s: 3, roles: ["admin", "contador"] },
     ],
   },
 ];
@@ -154,18 +155,18 @@ export const SPRINTS: { s: number; meta: string; fechas: string; pantallas: Pant
   {
     s: 3,
     meta: "IVA, compras y ventas, inventario, planilla, bancos y estados restantes.",
-    fechas: "Por planificar",
+    fechas: "24 al 30 de noviembre de 2026",
     pantallas: [
-      { n: "Libros de IVA", hu: "HU-45 · HU-46 · HU-47", desc: "Compras, contribuyentes y consumidor final." },
-      { n: "Liquidación F-07 y F-14", hu: "HU-48 · HU-49 · HU-50", desc: "Remanente, pago a cuenta y retenciones." },
-      { n: "Compras y ventas", hu: "HU-59 · HU-60 · HU-61", desc: "Registro en un paso con su partida." },
-      { n: "Cobros, pagos y antigüedad", hu: "HU-62 · HU-63", desc: "Abonos y rangos de vencimiento." },
-      { n: "Kardex", hu: "HU-65", desc: "Costo promedio y PEPS." },
-      { n: "Planilla, boletas y prestaciones", hu: "HU-72 · HU-73 · HU-74", desc: "Cálculo y provisiones." },
-      { n: "Caja chica, bancos y conciliación", hu: "HU-77 · HU-78 · HU-79", desc: "Movimientos y partidas en tránsito." },
-      { n: "Depreciación", hu: "HU-82", desc: "Cuadro por activo y partida mensual." },
-      { n: "Patrimonio, flujo y comparativos", hu: "HU-40 a HU-43", desc: "Formato de clase o NIIF." },
-      { n: "Respaldos", hu: "HU-13", desc: "Respaldo y restauración por empresa." },
+      { n: "Libros de IVA", ruta: "/libros-iva", hu: "HU-45 · HU-46 · HU-47", desc: "Compras, contribuyentes y consumidor final." },
+      { n: "Liquidación F-07 y F-14", ruta: "/declaraciones", hu: "HU-48 · HU-49 · HU-50", desc: "Remanente, pago a cuenta y retenciones." },
+      { n: "Compras y ventas", ruta: "/compras", hu: "HU-59 · HU-60 · HU-61", desc: "Registro en un paso con su partida." },
+      { n: "Cobros, pagos y antigüedad", ruta: "/cobros-pagos", hu: "HU-62 · HU-63", desc: "Abonos y rangos de vencimiento." },
+      { n: "Kardex", ruta: "/kardex", hu: "HU-65", desc: "Costo promedio y PEPS." },
+      { n: "Planilla, boletas y prestaciones", ruta: "/planilla", hu: "HU-72 · HU-73 · HU-74", desc: "Cálculo y provisiones." },
+      { n: "Caja chica, bancos y conciliación", ruta: "/conciliacion", hu: "HU-77 · HU-78 · HU-79", desc: "Movimientos y partidas en tránsito." },
+      { n: "Depreciación", ruta: "/depreciacion", hu: "HU-82", desc: "Cuadro por activo y partida mensual." },
+      { n: "Patrimonio, flujo y comparativos", ruta: "/estados-adicionales", hu: "HU-40 a HU-43", desc: "Formato de clase o NIIF." },
+      { n: "Respaldos", ruta: "/respaldos", hu: "HU-13", desc: "Respaldo y restauración por empresa." },
     ],
   },
   {

@@ -21,6 +21,13 @@ import { PartidaEditor } from "./pantallas/PartidaEditor";
 import { PARTIDAS } from "./datos/ejemplo";
 import { Partidas, Pendientes } from "./pantallas/Partidas";
 import { Tablero } from "./pantallas/Tablero";
+import { CobrosPagos, Compras, Ventas } from "./pantallas/Comercial";
+import { Kardex } from "./pantallas/Inventario";
+import { Planilla, Prestaciones } from "./pantallas/Personal";
+import { Conciliacion, Depreciacion } from "./pantallas/Tesoreria";
+import { EstadosAdicionales } from "./pantallas/EstadosExtra";
+import { Respaldos } from "./pantallas/Respaldos";
+import { Declaraciones, LibrosIva } from "./pantallas/Tributario";
 import { Pagina } from "./ui";
 
 /** Si el rol no tiene la pantalla en su menú, muestra el aviso de acceso denegado. */
@@ -95,6 +102,18 @@ export default function App() {
           {p("/empleados", <Empleados />)}
           {p("/caja-bancos", <CajaBancos />)}
           {p("/activos", <Activos />)}
+          {p("/libros-iva", <LibrosIva />)}
+          {p("/declaraciones", <Declaraciones />)}
+          {p("/compras", <Compras />)}
+          {p("/ventas", <Ventas />)}
+          {p("/cobros-pagos", <CobrosPagos />)}
+          {p("/kardex", <Kardex />)}
+          {p("/planilla", <Planilla />)}
+          {p("/prestaciones", <Prestaciones />)}
+          {p("/conciliacion", <Conciliacion />)}
+          {p("/depreciacion", <Depreciacion />)}
+          {p("/estados-adicionales", <EstadosAdicionales />)}
+          {p("/respaldos", <Respaldos />)}
           {p("/empresa", <Empresa />)}
           {p("/sucursales", <Sucursales />)}
           {p("/usuarios", <Usuarios />)}
