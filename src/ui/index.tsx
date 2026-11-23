@@ -70,9 +70,10 @@ export const Entrada = forwardRef<HTMLInputElement, InputHTMLAttributes<HTMLInpu
   ({ mal, className, ...p }, ref) => <input ref={ref} {...p} className={cx(baseEntrada, mal ? "border-alerta" : "border-bordef", className)} />,
 );
 export function Selector({ className, children, ...p }: SelectHTMLAttributes<HTMLSelectElement>) {
+  const ancho = className?.match(/(?:^|\s)w-\[(\d+(?:px|rem))\]/)?.[1]; // un ancho fijo como w-[200px] gana al w-full de la base
   return (
     <select {...p} className={cx(baseEntrada, className?.includes("w-auto") && "!w-auto", "border-bordef appearance-none pr-9 bg-no-repeat bg-[right_14px_center]", className)}
-      style={{ backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23A3A3A3' stroke-width='2.5' stroke-linecap='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E\")" }}>
+      style={{ ...(ancho ? { width: ancho } : {}), backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23A3A3A3' stroke-width='2.5' stroke-linecap='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E\")" }}>
       {children}
     </select>
   );
