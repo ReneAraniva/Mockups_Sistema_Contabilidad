@@ -28,6 +28,12 @@ import { Conciliacion, Depreciacion } from "./pantallas/Tesoreria";
 import { EstadosAdicionales } from "./pantallas/EstadosExtra";
 import { Respaldos } from "./pantallas/Respaldos";
 import { Declaraciones, LibrosIva } from "./pantallas/Tributario";
+import { Documentos } from "./pantallas/Dte";
+import { Indicadores, Razones } from "./pantallas/Analitica";
+import { Firma, Verificar } from "./pantallas/Firma";
+import { Perfil } from "./pantallas/Perfil";
+import { Calendario } from "./pantallas/Calendario";
+import { NotasEstados, PartidasRecurrentes, PlanillasOficiales, TomaFisica } from "./pantallas/Complementarias";
 import { Pagina } from "./ui";
 
 /** Si el rol no tiene la pantalla en su menú, muestra el aviso de acceso denegado. */
@@ -114,6 +120,18 @@ export default function App() {
           {p("/depreciacion", <Depreciacion />)}
           {p("/estados-adicionales", <EstadosAdicionales />)}
           {p("/respaldos", <Respaldos />)}
+          {p("/dte", <Documentos />)}
+          {p("/indicadores", <Indicadores />)}
+          {p("/razones", <Razones />)}
+          {p("/firma", <Firma />)}
+          <Route path="/verificar" element={<Verificar />} />
+          <Route path="/verificar/:codigo" element={<Verificar />} />
+          {p("/calendario", <Calendario />)}
+          {p("/recurrentes", <PartidasRecurrentes />)}
+          {p("/toma-fisica", <TomaFisica />)}
+          {p("/notas-estados", <NotasEstados />)}
+          {p("/planillas-oficiales", <PlanillasOficiales />)}
+          <Route path="/perfil" element={<Protegida ruta="/perfil"><Perfil /></Protegida>} />
           {p("/empresa", <Empresa />)}
           {p("/sucursales", <Sucursales />)}
           {p("/usuarios", <Usuarios />)}
