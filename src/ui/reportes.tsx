@@ -1,7 +1,7 @@
 import { useRef, useState, type ReactNode } from "react";
 import { CalendarDays, CircleCheck, Download, FileSpreadsheet, FileText } from "lucide-react";
 import { useApp } from "../contexto";
-import { Aviso, Boton, Entrada, Flotante, OpcionFlot, Tarjeta, cx, dinero, td, th } from "./index";
+import { Aviso, Boton, Entrada, Etiqueta, Flotante, OpcionFlot, Tarjeta, cx, dinero, td, th } from "./index";
 
 /* Componentes compartidos de los libros y reportes (Sprint 2). Solo diseño: nada se genera. */
 
@@ -131,10 +131,15 @@ export function TablaCifras<T>({ cols, filas, clave, fijarPrimera, totales = "To
 /** Contenido de una tarjeta móvil: línea de contexto, estado, título, cifra y detalle. */
 export type TarjetaMovil = { meta: ReactNode; estado?: ReactNode; titulo: ReactNode; valor?: ReactNode; detalle?: ReactNode };
 
+/** Nota de verificación que se ajusta al ancho: en celular el texto baja de línea en vez de salirse. */
+export function Nota({ children }: { children: ReactNode }) {
+  return <span className="flex items-start gap-2 w-fit max-w-full px-3.5 py-2 rounded-2xl bg-tarjeta2 text-sm font-semibold"><CircleCheck size={16} className="shrink-0 mt-0.5" /><span className="min-w-0">{children}</span></span>;
+}
+
 /** Indica si un reporte cuadra; si no, avisa con la diferencia (RNF-01). */
 export function Cuadre({ d, h, etiqueta = "Debe y haber" }: { d: number; h: number; etiqueta?: string }) {
   const dif = d - h;
-  if (!dif) return <span className="inline-flex items-center gap-2 h-9 px-3.5 rounded-full bg-tarjeta2 text-sm font-semibold"><CircleCheck size={16} />{etiqueta} cuadran · US$ {dinero(d / 100)}</span>;
+  if (!dif) return <Nota>{etiqueta} cuadran · US$ {dinero(d / 100)}</Nota>;
   return <Aviso mal><b className="font-semibold">No cuadra.</b> {etiqueta} difieren en US$ {dinero(Math.abs(dif) / 100)}. Revisa las partidas del período antes de usar este reporte.</Aviso>;
 }
 
@@ -179,5 +184,28 @@ export function BarraFiltros({ desde, hasta, onDesde, onHasta, children, exporta
       {children}
       {exportar && <div className="ml-auto">{exportar}</div>}
     </Tarjeta>
+  );
+}
+
+/* ---------- Partida propuesta ---------- */
+export type LineaPartida = { c: string; n: string; d: number; h: number };
+/** Partida que el sistema propone antes de confirmar (borrador para el contador, o contabilizada con confirmación). */
+export function VistaPartida({ lineas, borrador = true }: { lineas: LineaPartida[]; borrador?: boolean }) {
+  const r = (n: number) => Math.round(n * 100 + 1e-7) / 100;
+  const d = r(lineas.reduce((t, l) => t + l.d, 0)), h = r(lineas.reduce((t, l) => t + l.h, 0));
+  return (
+    <div className="grid gap-2">
+      <div className="flex items-center justify-between"><b className="text-sm font-semibold">Partida propuesta</b>{borrador && <Etiqueta t="borrador">Borrador</Etiqueta>}</div>
+      <div className="rounded-2xl border border-borde overflow-hidden">
+        <TablaCifras<LineaPartida> clave={(l) => l.c + l.n} filas={lineas.filter((l) => l.d || l.h)} totales="Sumas iguales" vacio="Completa los datos para ver la partida."
+          cols={[
+            { clave: "c", titulo: "Cuenta", ver: (l) => <span className="cifra text-texto2">{l.c}</span> },
+            { clave: "n", titulo: "Nombre", ver: (l) => l.n },
+            { clave: "d", titulo: "Debe", tipo: "num", total: d, ver: (l) => <Cifra v={l.d} /> },
+            { clave: "h", titulo: "Haber", tipo: "num", total: h, ver: (l) => <Cifra v={l.h} /> },
+          ]} />
+      </div>
+      {d !== h && <Aviso mal>La partida no cuadra: difiere en US$ {dinero(Math.abs(d - h))}.</Aviso>}
+    </div>
   );
 }

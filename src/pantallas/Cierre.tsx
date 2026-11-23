@@ -71,13 +71,13 @@ export function Cierre() {
       <CabTarjeta titulo="Antes de cerrar el ejercicio 2026" sub="Las cinco deben estar en orden para continuar" />
       <ul>
         {validaciones.map((v) => (
-          <li key={v.t} className="flex items-start gap-3 px-5 py-4 border-b border-borde last:border-0">
+          <li key={v.t} className="flex flex-wrap sm:flex-nowrap items-start gap-x-3 gap-y-3 px-5 py-4 border-b border-borde last:border-0">
             {v.ok ? <CircleCheck size={20} className="shrink-0 mt-0.5" /> : <CircleAlert size={20} className="shrink-0 mt-0.5 text-alerta" />}
-            <div className="min-w-0 flex-1">
+            <div className="min-w-0 flex-1 basis-[calc(100%-2.25rem)] sm:basis-0">
               <b className={cx("font-semibold", !v.ok && "text-alerta")}>{v.t}</b>
               <p className="text-sm text-texto2 mt-0.5">{v.det}</p>
             </div>
-            {!v.ok && v.arreglo && <Boton peq onClick={v.arreglo}>{v.accion}</Boton>}
+            {!v.ok && v.arreglo && <div className="ml-8 sm:ml-0"><Boton peq onClick={v.arreglo}>{v.accion}</Boton></div>}
           </li>
         ))}
       </ul>

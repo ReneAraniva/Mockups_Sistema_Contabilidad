@@ -4,8 +4,8 @@ import { useApp } from "../contexto";
 import { PARAMS } from "../datos/parametros";
 import { EMPRESA_CHERO, balanceGeneral, enDinero, estadoResultados, hojaTrabajo } from "../datos/libros";
 import { Marco, Permiso } from "../marco/Marco";
-import { Aviso, Boton, Campo, Casilla, Dialogo, Entrada, Etiqueta, Pagina, Pestanas, Segmento, Selector, Tarjeta, Titulo, cx, dinero } from "../ui";
-import { BarraFiltros, BotonExportar, Cifra, Cuadre, EncabezadoLibro, TablaCifras } from "../ui/reportes";
+import { Aviso, Boton, Campo, Casilla, Dialogo, Entrada, Pagina, Pestanas, Segmento, Selector, Tarjeta, Titulo, cx, dinero } from "../ui";
+import { BarraFiltros, BotonExportar, Cifra, Cuadre, EncabezadoLibro, Nota, TablaCifras } from "../ui/reportes";
 
 type Fila = { id: string; t: string; v?: number; nivel?: 0 | 1; fuerte?: boolean };
 const SUCURSALES = ["Casa matriz", "Metrocentro"];
@@ -82,7 +82,7 @@ export function Estados() {
         {tab === "bg" && <p className="text-xs text-texto3 -mt-2">El balance es a la fecha «Hasta»; «Desde» solo aplica al estado de resultados.</p>}
 
         {tab === "er"
-          ? coincide ? <Etiqueta t="neutra">Coincide al centavo con la hoja de trabajo · US$ {dinero(enDinero(er.neta))}</Etiqueta> : null
+          ? coincide ? <Nota>Coincide al centavo con la hoja de trabajo · US$ {dinero(enDinero(er.neta))}</Nota> : null
           : <Cuadre d={bg.activo} h={bg.pasivoMasPatrimonio} etiqueta="Activo y pasivo más patrimonio" />}
         {tab === "er" && filtro && <Aviso>El impuesto sobre la renta se calcula para la empresa completa, por eso no aparece por sucursal.</Aviso>}
 
