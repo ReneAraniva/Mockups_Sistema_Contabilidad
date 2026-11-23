@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Ban, CircleCheck, FilePlus2, Plus } from "lucide-react";
+import { Ban, CircleCheck, FilePlus2, FileUp, Plus } from "lucide-react";
 import { useApp } from "../contexto";
 import {
   ACTIVO_CASO, CONCILIACION, EMPRESA_OFICIAL, FONDO_CAJA_CHICA, MOV_BANCOS, VALES, cuadroDepreciacion, redondear, suma, type Movimiento,
@@ -26,6 +26,7 @@ export function Conciliacion() {
   const [cuenta, setCuenta] = useState(CONCILIACION.cuenta);
   const [marcados, setMarcados] = useState<Record<string, boolean>>({ m2: true, m4: true });
   const [guardada, setGuardada] = useState(false);
+  const [imp, setImp] = useState<"" | "elegir" | "revisar">("");
 
   /* caja chica */
   const [vc, setVc] = useState({ concepto: "", doc: "", neto: "" });
@@ -119,6 +120,7 @@ export function Conciliacion() {
               <span className="text-sm text-texto2 pb-2.5">Corte al {CONCILIACION.corte}</span>
               <div className="flex-1" />
               {guardada ? <Etiqueta t="contab"><CircleCheck size={13} />Conciliada</Etiqueta> : dif === 0 && activa ? <Etiqueta t="neutra">Sin diferencia</Etiqueta> : activa && <Etiqueta t="desc">Diferencia US$ {dinero(Math.abs(dif))}</Etiqueta>}
+              <Permiso roles={["admin", "contador"]}><Boton onClick={() => setImp("elegir")}><FileUp size={16} />Importar estado de cuenta</Boton></Permiso>
               <BotonExportar nombre="Conciliación bancaria" formatos={["PDF"]} />
             </Tarjeta>
             {!activa ? <Aviso>Esta cuenta no tiene movimientos en octubre de 2026.</Aviso> : (
@@ -148,6 +150,29 @@ export function Conciliacion() {
           </>
         )}
       </Pagina>
+
+      <Dialogo abierto={!!imp} onCerrar={() => setImp("")} ancho="max-w-[680px]" titulo="Importar el estado de cuenta" sub="Archivo CSV del banco; el sistema empareja cada línea con los movimientos del mes."
+        pie={imp === "elegir" ? <><Boton v="fan" onClick={() => setImp("")}>Cancelar</Boton><Boton v="pri" onClick={() => setImp("revisar")}>Cargar archivo</Boton></>
+          : <><Boton v="fan" onClick={() => setImp("elegir")}>Atrás</Boton><Boton v="pri" onClick={() => { setMarcados({ ...marcados, m2: true, m4: true }); setGuardada(false); setImp(""); avisar("2 movimientos conciliados; 1 línea sin coincidencia"); }}>Aplicar coincidencias</Boton></>}>
+        {imp === "elegir" && (
+          <div className="border border-dashed border-bordef rounded-2xl p-8 grid justify-items-center gap-2 text-center">
+            <FileUp size={26} className="text-texto2" /><b className="font-semibold">estado_cuenta_octubre2026.csv</b><span className="text-sm text-texto2">Archivo de ejemplo · 3 líneas · fechas dd/mm/aaaa y montos con punto decimal</span>
+          </div>
+        )}
+        {imp === "revisar" && (
+          <div className="rounded-2xl border border-borde overflow-hidden">
+            <TablaCifras<{ f: string; d: string; m: number; ok: string }> clave={(x) => x.d} totales={false}
+              filas={[{ f: "29/10/2026", d: "Cheque 0013", m: -67.8, ok: "CK-0013" }, { f: "30/10/2026", d: "Comisiones bancarias", m: -15, ok: "NC-1178" }, { f: "31/10/2026", d: "Comisión por transferencia", m: -2.5, ok: "" }]}
+              cols={[
+                { clave: "f", titulo: "Fecha", ver: (x) => <span className="cifra">{x.f}</span> },
+                { clave: "d", titulo: "Descripción del banco", ver: (x) => x.d },
+                { clave: "m", titulo: "Monto", tipo: "num", ver: (x) => <Cifra v={x.m} /> },
+                { clave: "e", titulo: "Coincidencia", ver: (x) => (x.ok ? <Etiqueta t="contab"><CircleCheck size={13} />{x.ok}</Etiqueta> : <Etiqueta t="desc">Sin coincidencia</Etiqueta>) },
+              ]} />
+          </div>
+        )}
+        {imp === "revisar" && <p className="text-xs text-texto3">La línea sin coincidencia necesita una nota de cargo en Cheques, remesas y notas.</p>}
+      </Dialogo>
 
       <Dialogo lateral abierto={vale} onCerrar={() => setVale(false)} titulo="Registrar vale" sub={`El fondo fijo es de US$ ${dinero(FONDO_CAJA_CHICA)}; no se puede gastar más de lo disponible.`}
         pie={<><Boton v="fan" onClick={() => setVale(false)}>Cancelar</Boton><Boton v="pri" disabled={!okVale} onClick={() => { setVales([...vales, { id: "v" + (vales.length + 1), fecha: "31/10/2026", doc: vc.doc, concepto: vc.concepto, neto: netoV, iva: redondear(netoV * 0.13), total: redondear(netoV * 1.13), estado: "Pendiente" }]); setVale(false); avisar("Vale registrado"); }}>Guardar vale</Boton></>}>
