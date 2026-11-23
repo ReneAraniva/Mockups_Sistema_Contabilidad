@@ -5,6 +5,8 @@ import "@fontsource/nunito/latin-400.css";
 import "@fontsource/nunito/latin-500.css";
 import "@fontsource/nunito/latin-600.css";
 import "@fontsource/nunito/latin-700.css";
+import "@fontsource/montserrat/latin-400.css";
+import "@fontsource/montserrat/latin-500.css";
 import "./index.css";
 import App from "./App";
 

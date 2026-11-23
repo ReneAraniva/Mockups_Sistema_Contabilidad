@@ -1,31 +1,86 @@
-import { useState, type FormEvent, type ReactNode } from "react";
+import { useEffect, useRef, useState, type FormEvent, type ReactNode } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { ArrowLeft, Eye, EyeOff, Loader2, MailCheck } from "lucide-react";
 import { useApp } from "../contexto";
 import { Boton, Campo, Entrada, errorCorreo } from "../ui";
+import { LogoAnimado } from "../ui/LogoAnimado";
 
 const GRANDE = "!h-14 !px-4 !text-base !rounded-2xl";
 const BOTON_GRANDE = "!h-14 !text-base";
 
+const TITULAR = "Tu contabilidad, clara y al centavo.";
+const BAJADA = "Partidas, libros, IVA y estados financieros de todas tus empresas y sucursales en un mismo lugar.";
+/** La introducción se anima la primera vez que se entra; al pasar entre acceso y recuperar ya no se repite. */
+let introVista = false;
+
+/** Escribe los textos uno tras otro, como una máquina de escribir, cuando termina el logotipo animado.
+ *  Devuelve cuántas letras lleva cada texto y cuál se está escribiendo (para el cursor). */
+function useMaquina(textos: string[], inicio: number, ms: number[], animar: boolean) {
+  const [n, setN] = useState<number[]>(() => textos.map((t) => (animar ? 0 : t.length)));
+  const [fin, setFin] = useState(!animar);
+  const [ini, setIni] = useState(false);
+  useEffect(() => {
+    if (!animar) return;
+    let linea = 0, car = 0, cancelado = false;
+    let t: ReturnType<typeof setTimeout>;
+    const paso = () => {
+      if (cancelado) return;
+      car++;
+      setIni(true);
+      const l = linea, c = car;
+      setN((prev) => prev.map((x, i) => (i === l ? c : x)));
+      if (car >= textos[linea].length) {
+        linea++; car = 0;
+        if (linea >= textos.length) { t = setTimeout(() => !cancelado && setFin(true), 2500); return; }
+        t = setTimeout(paso, 450);
+      } else t = setTimeout(paso, ms[linea]);
+    };
+    t = setTimeout(paso, inicio);
+    return () => { cancelado = true; clearTimeout(t); };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  const activa = n.findIndex((x, i) => x < textos[i].length);
+  return { n, cursor: fin || !ini ? -1 : activa === -1 ? textos.length - 1 : activa };
+}
+
+/** Texto a medio escribir: lo que falta se reserva invisible para que nada se mueva ni cambie de línea. */
+function Escrito({ texto, n, cursor }: { texto: string; n: number; cursor: boolean }) {
+  return (
+    <span aria-hidden>
+      {texto.slice(0, n)}{cursor && <i className="eq-cursor" />}<span className="invisible">{texto.slice(n)}</span>
+    </span>
+  );
+}
+
 function MarcoAcceso({ children }: { children: ReactNode }) {
+  const reducir = typeof matchMedia !== "undefined" && matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const animar = useRef(!introVista && !reducir).current;
+  useEffect(() => { introVista = true; }, []);
+  const { n, cursor } = useMaquina([TITULAR, BAJADA], 4100, [46, 14], animar);
+  const quieto = animar ? "" : "eq-quieto";
   return (
     <div className="min-h-screen grid lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)]">
-      <aside className="hidden lg:flex flex-col justify-between bg-barra border-r border-borde p-12">
-        <div className="flex items-center gap-3">
-          <span className="w-12 h-12 rounded-2xl bg-pri text-prit grid place-items-center font-bold text-lg">SC</span>
-          <b className="font-semibold text-lg">Sistema Contable</b>
+      <aside className="hidden lg:flex flex-col justify-between bg-barra border-r border-borde p-12 xl:p-16">
+        <span aria-hidden />
+        {/* El logotipo completo aparece; el nombre se desvanece y el titular se escribe en su lugar, junto al caballo. */}
+        <div className="max-w-[472px]">
+          <div className="flex items-center gap-7">
+            <LogoAnimado parte="caballo" escala={0.62} className={quieto} />
+            <div className="relative flex-1 min-w-0">
+              <h2 aria-label={TITULAR} className="text-[34px] xl:text-[38px] leading-[1.12] font-light tracking-tight"><Escrito texto={TITULAR} n={n[0]} cursor={cursor === 0} /></h2>
+              <div className={`eq-sale ${quieto} absolute inset-0 flex items-center`}><LogoAnimado parte="nombre" escala={0.94} className={quieto} /></div>
+            </div>
+          </div>
+          <p aria-label={BAJADA} className="text-texto2 mt-9 text-lg"><Escrito texto={BAJADA} n={n[1]} cursor={cursor === 1} /></p>
         </div>
-        <div className="max-w-md">
-          <h2 className="text-[52px] leading-[1.08] font-light tracking-tight">Tu contabilidad, clara y al centavo.</h2>
-          <p className="text-texto2 mt-5 text-lg">Partidas, libros, IVA y estados financieros de todas tus empresas y sucursales en un mismo lugar.</p>
+        <div className="flex items-center gap-6 text-texto3 text-sm">
+          <b className="font-semibold tracking-[.28em] text-texto2 text-xs">EQUUS</b>
+          <span className="w-px h-3.5 bg-bordef" />
+          <span>Multiempresa</span><span>Multisucursal</span><span>US$ · dd/mm/aaaa</span>
         </div>
-        <div className="flex gap-6 text-texto3 text-sm"><span>Multiempresa</span><span>Multisucursal</span><span>US$ · dd/mm/aaaa</span></div>
       </aside>
       <main className="flex flex-col items-center justify-center px-4 py-10 sm:px-8">
-        <div className="lg:hidden flex items-center gap-3 mb-10">
-          <span className="w-12 h-12 rounded-2xl bg-pri text-prit grid place-items-center font-bold text-lg">SC</span>
-          <b className="font-semibold text-lg">Sistema Contable</b>
-        </div>
+        <div className="lg:hidden mb-10 flex items-center justify-center gap-3"><LogoAnimado parte="caballo" escala={0.46} className={quieto} /><LogoAnimado parte="nombre" escala={0.68} className={quieto} /></div>
         <div className="w-full max-w-[520px]">{children}</div>
         <Link to="/" className="mt-10 text-sm text-texto3 hover:text-texto2">Índice del prototipo</Link>
       </main>

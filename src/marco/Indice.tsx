@@ -4,6 +4,7 @@ import { ArrowUpRight, Eye, Lock, Monitor, Smartphone, Tablet } from "lucide-rea
 import { useApp } from "../contexto";
 import { MENU, ROLES, SPRINTS, TODOS, type Rol } from "../datos/navegacion";
 import { Etiqueta, Segmento, cx } from "../ui";
+import { Isologo } from "../ui/Logo";
 
 /** Qué cambia en la interfaz según el rol (matriz de permisos). */
 const RESUMEN: Record<Rol, string> = {
@@ -18,7 +19,7 @@ function acceso(ruta: string | undefined, rol: Rol): Acceso {
   if (ruta === "/partidas/nueva") return rol === "consulta" ? "no" : "total";
   const op = MENU.flatMap((g) => g.items).find((i) => i.ruta === ruta);
   if (!(op?.roles ?? TODOS).includes(rol)) return "no";
-  const soloLectura: Record<string, Rol[]> = { "/empresa": ["contador", "auxiliar", "consulta"], "/sucursales": ["contador", "auxiliar", "consulta"], "/catalogo": ["auxiliar", "consulta"], "/partidas": ["consulta"], "/periodos": ["auxiliar", "consulta"], "/tablero": [] };
+  const soloLectura: Record<string, Rol[]> = { "/empresa": ["contador", "auxiliar", "consulta"], "/sucursales": ["contador", "auxiliar", "consulta"], "/catalogo": ["auxiliar", "consulta"], "/partidas": ["consulta"], "/periodos": ["auxiliar", "consulta"], "/tablero": [], "/compras": ["consulta"], "/ventas": ["consulta"], "/cobros-pagos": ["consulta"], "/conciliacion": ["consulta"], "/declaraciones": ["consulta"] };
   return soloLectura[ruta]?.includes(rol) ? "lectura" : "total";
 }
 
@@ -37,9 +38,9 @@ export function Indice() {
     <div className="min-h-screen">
       <header className="sticky top-0 z-40 bg-barra/95 backdrop-blur border-b border-borde">
         <div className="max-w-[1320px] mx-auto px-4 sm:px-6 h-16 flex items-center gap-3">
-          <span className="w-9 h-9 rounded-xl bg-pri text-prit grid place-items-center font-bold text-sm">SC</span>
+          <Isologo alto={34} />
           <div className="min-w-0">
-            <b className="block font-semibold leading-tight">Sistema Contable UNIVO</b>
+            <b className="block font-semibold leading-tight tracking-[.12em]">EQUUS</b>
             <span className="text-xs text-texto2">Prototipo de interfaz · solo diseño, nada se guarda</span>
           </div>
         </div>

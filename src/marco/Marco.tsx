@@ -4,6 +4,7 @@ import { Building2, Check, ChevronRight, Globe, LayoutGrid, LogOut, Menu, MapPin
 import { EMPRESAS, PERIODOS, useApp } from "../contexto";
 import { MENU, ROLES, TODOS, type Rol } from "../datos/navegacion";
 import { Flotante, OpcionFlot, Segmento, TitFlot, cx } from "../ui";
+import { Isologo } from "../ui/Logo";
 
 const esMac = typeof navigator !== "undefined" && /Mac|iPhone|iPad/.test(navigator.platform);
 export const ATAJO = esMac ? "⌘ K" : "Ctrl K";
@@ -77,6 +78,7 @@ export function Marco({ ruta, children }: { ruta: { t: string; a?: string }[]; c
             menu ? "bg-pri text-prit border-pri" : "bg-tarjeta border-borde hover:bg-tarjeta2")}>
           {menu ? <X size={18} /> : <Menu size={18} />}
         </button>
+        <Link to="/tablero" aria-label="EQUUS · Ir al tablero" className="shrink-0 px-1 hidden min-[380px]:block"><Isologo alto={30} /></Link>
         <nav aria-label="Ubicación" className="flex items-center gap-1.5 text-sm text-texto2 min-w-0">
           {ruta.map((r, i) => i < ruta.length - 1 ? (
             <span key={r.t} className="hidden sm:flex items-center gap-1.5">
@@ -206,7 +208,7 @@ export function Marco({ ruta, children }: { ruta: { t: string; a?: string }[]; c
       </Flotante>
 
       {children}
-      <footer className="text-center text-texto3 text-xs pb-6">Sistema Contable UNIVO · v0.1.0</footer>
+      <footer className="text-center text-texto3 text-xs pb-6">EQUUS · Tu mejor movimiento contable · UNIVO · v0.1.0</footer>
     </>
   );
 }
